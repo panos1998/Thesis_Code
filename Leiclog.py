@@ -1,4 +1,3 @@
-from pickle import TRUE
 from arfftocsv import arfftocsv, labelize, dataEncoding
 from operator import index
 import pandas as pd
@@ -35,7 +34,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, recall_score, confusion_matrix, roc_auc_score
 from sklearn.model_selection import train_test_split
 stats = []
-thresholds = np.linspace(0, 1, 100)
+thresholds = np.linspace(0, 1, 1000)
 for thr in tqdm.tqdm(thresholds, colour='CYAN'):
     for i in range(0,10):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y)
@@ -46,7 +45,7 @@ for thr in tqdm.tqdm(thresholds, colour='CYAN'):
         tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
         stats.append([tp/(tp + fn),tn/(tn + fp), roc_auc_score(y_test, y_pred), thr])
         #print('Mean sensitivity', 'Mean specificity', 'AUC',' Threshold', np.mean(stats, axis=0), thr)
-best = max(stats, key= lambda x:x[0] +x[1] - 1)
-print('Younden Index', best[0] + best[1] - 1, best)
+sensitivity, specificity, auc, thr = max(stats, key= lambda x:x[0] +x[1] - 1)
+print('Younden Index', sensitivity + specificity -1, 'AUC', auc, 'Threshold', thr)
     #print(np.mean(stats[:,0]), np.mean(stats[:,1]))
     # να δουμε αυριο τι να αλλαξουμε μπας κ φτασουμε τα σωστα, οπως regularization C, penalty l1, l2 
