@@ -30,28 +30,40 @@ data = processing(all_labels, labels, to_replace, values, path)
 # Apply machine learning techniques
 X = data[labels[:-1]]
 y = data[labels[len(labels)-1]]
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, recall_score, confusion_matrix, roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split, StratifiedKFold
 import matplotlib.pyplot as plt
 stats = []
-aucs = list()
-mean_aucs = list()
+aucs = np.zeros((10, 8, 100))
+mean_auc_per_epoch = 0
+mean_aucs = np.array(np.zeros((100,10)), dtype=float)
 thresholds = np.linspace(0, 1, 1000)
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
-for i in range(0,10):                                       # TRUE NEGATIVE RATE = SPECIFICITY
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y)
-    clf = LogisticRegression().fit(X_train, y_train)
-    y_pred = (clf.predict_proba(X_test))[:,1]
+for k in tqdm.tqdm(range(100), colour='CYAN'):
+    for i in range(0,10):
+       j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
+       X_train, X_test, y_train, y_test = train_test_split(X, y, 
+       train_size=  0.07, test_size=0.03, stratify=y)
+       for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:
+           clf = LogisticRegression(C=c, solver='liblinear', penalty='l1').fit(X_train, y_train)
+           y_pred = (clf.predict_proba(X_test))[:,1]
     #print(classification_report(y_test, y_pred))
     #print(recall_score(y_test, y_pred, average=None))
     #tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-    fpr, sensitivity, thresholds = roc_curve(y_test, y_pred)
-    stats.append([1-fpr, sensitivity])
-    aucs.append(roc_auc_score(y_test, y_pred))
-mean_aucs.append(np.mean(aucs))
-print('mean auc',np.mean(aucs), 'max auc: ', np.max(aucs), 'min auc: ', np.min(aucs))
+           fpr, sensitivity, thresholds = roc_curve(y_test, y_pred)
+           stats.append([1-fpr, sensitivity])
+           aucs[i, j, k] =(roc_auc_score(y_test, y_pred))
+           j = j + 1
+print(np.mean(np.mean(aucs, axis =2), axis =0))
+   # mean_auc_per_epoch = np.mean(aucs, axis = 0)
+    #mean_aucs[k] = mean_auc_per_epoch
+#print(np.mean(mean_aucs, axis = 0))
+
+
+#print(aucs)
+
+#print('mean auc',np.mean(aucs), 'max auc: ', np.max(aucs), 'min auc: ', np.min(aucs))
 #print(np.mean(mean_aucs),max(mean_aucs))
     #plt.plot(fpr, sensitivity)
     #plt.ylabel('Sensitivity')
@@ -63,4 +75,6 @@ print('mean auc',np.mean(aucs), 'max auc: ', np.max(aucs), 'min auc: ', np.min(a
     #print(np.mean(stats[:,0]), np.mean(stats[:,1]))
     # να δουμε αυριο τι να αλλαξουμε μπας κ φτασουμε τα σωστα, οπως regularization C, penalty l1, l2 
     #Υπαρχει μια απόκλιση 4%
+    #Εδω θα βαλουμε αυριο το κωδικα για να βρουμε το threshold, να ψαξω αν πρωτα πρεπει να κανω  training  και μετα hyper
+    # parameters ή βολευει οπως το εκανα
 # %%
