@@ -83,8 +83,8 @@ for thr in tqdm.tqdm(thresholds):
     sum(you[1] for you in younden)/ len(younden),
     sum(you[2] for you in younden)/ len(younden), thr))
 params =list(clf.get_params().values()) 
-print('Maximum younden,specificity, sensitivity, threshold, c and penalty ',
- max(scores, key=lambda score: score[0]), params[0], params[9])
+optimal =max(scores, key=lambda score: score[0])
+print('Maximum younden,specificity, sensitivity, threshold, c and penalty ',optimal,params[0], params[9])
 plt2 = plt.figure(2)
 plt.plot([x[3] for x in scores], [x[0] for x in scores])
 plt.show()
@@ -102,7 +102,7 @@ for i in tqdm.tqdm(range(0,10)):                                      # TRUE NEG
     X_train, X_test, y_train, y_test = train_test_split(X, y, 
     train_size=  0.7, test_size=0.3, stratify=y)
     clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
-    y_pred = (clf.predict_proba(X_test)[:,1] >= 0.1431).astype(bool)
+    y_pred = (clf.predict_proba(X_test)[:,1] >= optimal[3]).astype(bool)
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     specificity = tn/(tn+fp)
     sensitivity = tp/(tp+fn)
@@ -118,3 +118,4 @@ ax[0][1].set_ylabel('Sensitivity')
 ax[1][0].set_ylabel('Specificity')
 plt.show()
 print(np.mean(younden_final, axis=0))
+# %%
