@@ -1,6 +1,5 @@
 #%%
 from arfftocsv import arfftocsv, labelize, dataEncoding
-from operator import index
 import pandas as pd
 import numpy as np
 import tqdm
@@ -31,22 +30,21 @@ data = processing(all_labels, labels, to_replace, values, path)
 X = data[labels[:-1]]
 y = data[labels[len(labels)-1]]
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, recall_score, confusion_matrix, roc_auc_score, roc_curve
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
+from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 stats = []
 aucs = np.zeros((10, 8, 100))
 mean_auc_per_epoch = 0
 mean_aucs = np.array(np.zeros((100,10)), dtype=float)
-thresholds = np.linspace(0, 1, 1000)
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
 for k in tqdm.tqdm(range(100), colour='CYAN'):
     for i in range(0,10):
        j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
        X_train, X_test, y_train, y_test = train_test_split(X, y, 
-       train_size=  0.07, test_size=0.03, stratify=y)
+       train_size=  0.7, test_size=0.3, stratify=y)
        for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:
-           clf = LogisticRegression(C=c, solver='liblinear', penalty='l1').fit(X_train, y_train)
+           clf = LogisticRegression(C=c, solver='liblinear', penalty='l2').fit(X_train, y_train)
            y_pred = (clf.predict_proba(X_test))[:,1]
     #print(classification_report(y_test, y_pred))
     #print(recall_score(y_test, y_pred, average=None))
@@ -55,26 +53,68 @@ for k in tqdm.tqdm(range(100), colour='CYAN'):
            stats.append([1-fpr, sensitivity])
            aucs[i, j, k] =(roc_auc_score(y_test, y_pred))
            j = j + 1
-print(np.mean(np.mean(aucs, axis =2), axis =0))
+means = np.mean(np.mean(aucs, axis =2), axis =0)
+print(means)
+plt1 = plt.figure(1)
+plt.plot(['0.0001', '0.001', '0.01', '0.1', '1', '10', '100', '1000'], means)
    # mean_auc_per_epoch = np.mean(aucs, axis = 0)
     #mean_aucs[k] = mean_auc_per_epoch
 #print(np.mean(mean_aucs, axis = 0))
 
+# να δουμε αυριο τι να αλλαξουμε μπας κ φτασουμε τα σωστα, οπως regularization C, penalty l1, l2 
+#Υπαρχει μια απόκλιση 4%
+#Εδω θα βαλουμε αυριο το κωδικα για να βρουμε το threshold, να ψαξω αν πρωτα πρεπει να κανω  training  και μετα hyper
+# parameters ή βολευει οπως το εκανα
+ 
+scores = list()
+thresholds = np.linspace(0, 1, 1000)
+for thr in tqdm.tqdm(thresholds):
+    younden = list()
+    for i in range(0,10):                                      # TRUE NEGATIVE RATE = SPECIFICITY
+       X_train, X_test, y_train, y_test = train_test_split(X, y, 
+       train_size=  0.7, test_size=0.3, stratify=y)
+       clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
+       y_pred = (clf.predict_proba(X_test)[:,1] >= thr).astype(bool)
+       tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+       specificity = tn/(tn+fp)
+       sensitivity = tp/(tp+fn)
+       younden.append((specificity+sensitivity-1,specificity, sensitivity))
+    scores.append((sum(you[0] for you in younden)/ len(younden),
+    sum(you[1] for you in younden)/ len(younden),
+    sum(you[2] for you in younden)/ len(younden), thr))
+params =list(clf.get_params().values()) 
+print('Maximum younden,specificity, sensitivity, threshold, c and penalty ',
+ max(scores, key=lambda score: score[0]), params[0], params[9])
+plt2 = plt.figure(2)
+plt.plot([x[3] for x in scores], [x[0] for x in scores])
+plt.show()
 
-#print(aucs)
+# l1 c = 10, 0.377 για  τα 10 μεγαλα dataset
+#ωρα για τα 10 μικρα l1 c = 10 0.4279 0.2020 ρεαλιστικα 0.41 με 0.151
+# l2 c = 1000 0.445 0.161 realistika 0.412 thr 0.151, y 0.44 sp 0.62, sens 0.82 thr 0.134
+# τελικη επιλογη l2 γιατι ειναι αρκετα γρηγοροτερη και c = 100
 
-#print('mean auc',np.mean(aucs), 'max auc: ', np.max(aucs), 'min auc: ', np.min(aucs))
-#print(np.mean(mean_aucs),max(mean_aucs))
-    #plt.plot(fpr, sensitivity)
-    #plt.ylabel('Sensitivity')
-    #plt.xlabel('1-Specificity')
-    #plt.show()
-    #print('Mean sensitivity', 'Mean specificity', 'AUC',' Threshold', np.mean(stats, axis=0), thr)
-#sensitivity, specificity, auc, thr = max(stats, key= lambda x:x[0] +x[1] - 1)
-#print('Younden Index', sensitivity + specificity -1, 'AUC', auc, 'Threshold', thr)
-    #print(np.mean(stats[:,0]), np.mean(stats[:,1]))
-    # να δουμε αυριο τι να αλλαξουμε μπας κ φτασουμε τα σωστα, οπως regularization C, penalty l1, l2 
-    #Υπαρχει μια απόκλιση 4%
-    #Εδω θα βαλουμε αυριο το κωδικα για να βρουμε το threshold, να ψαξω αν πρωτα πρεπει να κανω  training  και μετα hyper
-    # parameters ή βολευει οπως το εκανα
-# %%
+
+### FINAL EVALUATION ######
+
+younden_final = list()
+for i in tqdm.tqdm(range(0,10)):                                      # TRUE NEGATIVE RATE = SPECIFICITY
+    X_train, X_test, y_train, y_test = train_test_split(X, y, 
+    train_size=  0.7, test_size=0.3, stratify=y)
+    clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
+    y_pred = (clf.predict_proba(X_test)[:,1] >= 0.1431).astype(bool)
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+    specificity = tn/(tn+fp)
+    sensitivity = tp/(tp+fn)
+    younden_final.append((specificity+sensitivity-1,specificity, sensitivity))
+younden_final = np.array(younden_final)
+fig, ax = plt.subplots(2, 2)
+fig.tight_layout()
+ax[0][0].plot(younden_final[:,0])
+ax[1][0].plot(younden_final[:,1])
+ax[0][1].plot(younden_final[:,2])
+ax[0][0].set_ylabel('Younden Index')
+ax[0][1].set_ylabel('Sensitivity')
+ax[1][0].set_ylabel('Specificity')
+plt.show()
+print(np.mean(younden_final, axis=0))
