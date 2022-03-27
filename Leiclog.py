@@ -17,7 +17,7 @@ to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'M
 
 values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1], 'bmicat': [1, 2, 3, 4, 5, 6], 'LeicRace': [0, 6],
  'hemda': [0, 1, 2], 'rYdiabe': [0, 1]}
-
+# this function places the labels for each model and converts categorical to numerical data
 def processing (all_labels: list, labels: list, to_replace: dict, values: dict, path, source: str = 'diabetes_paper_fazakis.csv',
  des: str  ='Finaldata.csv')-> pd.DataFrame:
  arfftocsv(source)
@@ -25,65 +25,64 @@ def processing (all_labels: list, labels: list, to_replace: dict, values: dict, 
  return dataEncoding(df, labels, to_replace, values, path)
 path = 'LeicLog.csv'
 data = processing(all_labels, labels, to_replace, values, path)
-
 # Apply machine learning techniques
-X = data[labels[:-1]]
-y = data[labels[len(labels)-1]]
-from sklearn.linear_model import LogisticRegression
+X = data[labels[:-1]] # get the features
+y = data[labels[len(labels)-1]] # get the target class
+from sklearn.linear_model import LogisticRegression 
 from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-stats = []
-aucs = np.zeros((10, 8, 100))
-mean_auc_per_epoch = 0
-mean_aucs = np.array(np.zeros((100,10)), dtype=float)
+from sklearn.linear_model import LogisticRegressionCV
+"""
+clf = LogisticRegressionCV(cv=5).fit(X, y)
+y_pred = (clf.predict_proba(X)[:,1]>=0.148).astype(bool)
+tn, fp, fn, tp = confusion_matrix(y, y_pred).ravel() # get confusion matrix
+specificity = tn/(tn+fp) # calculate specificity
+sensitivity = tp/(tp+fn) # calculate sensitivity
+print(specificity, sensitivity)
+print(clf.get_params().items())
+"""
+aucs = np.zeros((10, 8, 100)) # initialize an array to store aucs
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
-for k in tqdm.tqdm(range(100), colour='CYAN'):
-    for i in range(0,10):
+for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
+    for i in range(0,10): # run through 10 different stratified datasets
        j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
-       X_train, X_test, y_train, y_test = train_test_split(X, y, 
-       train_size=  0.7, test_size=0.3, stratify=y)
-       for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:
-           clf = LogisticRegression(C=c, solver='liblinear', penalty='l2').fit(X_train, y_train)
-           y_pred = (clf.predict_proba(X_test))[:,1]
-    #print(classification_report(y_test, y_pred))
-    #print(recall_score(y_test, y_pred, average=None))
-    #tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-           fpr, sensitivity, thresholds = roc_curve(y_test, y_pred)
-           stats.append([1-fpr, sensitivity])
-           aucs[i, j, k] =(roc_auc_score(y_test, y_pred))
-           j = j + 1
-means = np.mean(np.mean(aucs, axis =2), axis =0)
+       X_train, X_test, y_train, y_test = train_test_split(X, y,
+       train_size=  0.7, test_size=0.3, stratify=y) # stratified train/test split 70/30
+       for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:#evaluate each dataset over 8 different C values
+           clf = LogisticRegression(C=c, solver='liblinear',
+            penalty='l2').fit(X_train, y_train) # train classifier over a dataset for C values
+           y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
+           fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
+           aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
+           j = j + 1                                      # for each dataset for each epoch
+means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datasets and epochs
 print(means)
 plt1 = plt.figure(1)
 plt.plot(['0.0001', '0.001', '0.01', '0.1', '1', '10', '100', '1000'], means)
-   # mean_auc_per_epoch = np.mean(aucs, axis = 0)
-    #mean_aucs[k] = mean_auc_per_epoch
-#print(np.mean(mean_aucs, axis = 0))
-
 # να δουμε αυριο τι να αλλαξουμε μπας κ φτασουμε τα σωστα, οπως regularization C, penalty l1, l2 
 #Υπαρχει μια απόκλιση 4%
 #Εδω θα βαλουμε αυριο το κωδικα για να βρουμε το threshold, να ψαξω αν πρωτα πρεπει να κανω  training  και μετα hyper
 # parameters ή βολευει οπως το εκανα
  
-scores = list()
-thresholds = np.linspace(0, 1, 1000)
-for thr in tqdm.tqdm(thresholds):
-    younden = list()
-    for i in range(0,10):                                      # TRUE NEGATIVE RATE = SPECIFICITY
+scores = list() # initialize a list to save scores
+thresholds = np.linspace(0, 1, 1000) # make a thr space to iterate over
+for thr in tqdm.tqdm(thresholds): # for different threshold values
+    younden = list() # initialize a list to save younden index for every 10-group evaluation
+    for i in range(0,10): #for every dataset       # TRUE NEGATIVE RATE = SPECIFICITY
        X_train, X_test, y_train, y_test = train_test_split(X, y, 
-       train_size=  0.7, test_size=0.3, stratify=y)
+       train_size=  0.7, test_size=0.3, stratify=y) # stratified train test split 70/30
        clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
-       y_pred = (clf.predict_proba(X_test)[:,1] >= thr).astype(bool)
-       tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-       specificity = tn/(tn+fp)
-       sensitivity = tp/(tp+fn)
-       younden.append((specificity+sensitivity-1,specificity, sensitivity))
-    scores.append((sum(you[0] for you in younden)/ len(younden),
-    sum(you[1] for you in younden)/ len(younden),
+       y_pred = (clf.predict_proba(X_test)[:,1] >= thr).astype(bool)# predict using current thr
+       tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel() # get confusion matrix
+       specificity = tn/(tn+fp) # calculate specificity
+       sensitivity = tp/(tp+fn) # calculate sensitivity
+       younden.append((specificity+sensitivity-1,specificity, sensitivity))# store metrics for each dataset
+    scores.append((sum(you[0] for you in younden)/ len(younden), #mean score for every 10-group
+    sum(you[1] for you in younden)/ len(younden), # per threshold
     sum(you[2] for you in younden)/ len(younden), thr))
-params =list(clf.get_params().values()) 
-optimal =max(scores, key=lambda score: score[0])
+params =list(clf.get_params().values())  # get classifier parameters
+optimal =max(scores, key=lambda score: score[0]) # best metrics over all thresholds
 print('Maximum younden,specificity, sensitivity, threshold, c and penalty ',optimal,params[0], params[9])
 plt2 = plt.figure(2)
 plt.plot([x[3] for x in scores], [x[0] for x in scores])
@@ -96,7 +95,7 @@ plt.show()
 
 
 ### FINAL EVALUATION ######
-
+# using the best threshold which calculated before and the best c, evaluate the final dataset
 younden_final = list()
 for i in tqdm.tqdm(range(0,10)):                                      # TRUE NEGATIVE RATE = SPECIFICITY
     X_train, X_test, y_train, y_test = train_test_split(X, y, 
