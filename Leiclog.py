@@ -1,4 +1,5 @@
 #%%
+from turtle import width
 from arfftocsv import arfftocsv, labelize, dataEncoding
 import numpy as np
 import pandas as pd
@@ -94,7 +95,11 @@ print('Maximum younden,specificity, sensitivity, threshold, c and penalty ',opti
 plt2 = plt.figure(2)
 plt.ylabel('Younden index')
 plt.xlabel('Threshold value')
+plt.annotate('Max',[optimal[3],optimal[0]],
+arrowprops=dict(facecolor='red', headwidth=7, headlength =5))
 plt.plot([x[3] for x in scores], [x[0] for x in scores])
+plt.axhline(y = optimal[0], xmax=optimal[3]*(1.15), linestyle ='--', color = 'red' )
+plt.axvline(optimal[3], linestyle ='--', color = 'red')
 plt.show()
 
 # l1 c = 10, 0.377 για  τα 10 μεγαλα dataset
