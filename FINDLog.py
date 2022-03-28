@@ -1,8 +1,7 @@
 #%%
 from turtle import width
-from arfftocsv import arfftocsv, labelize, dataEncoding, processing
+from arfftocsv import processing
 import numpy as np
-import pandas as pd
 import tqdm
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
@@ -10,22 +9,24 @@ all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
 
-labels = ['LeicAge','LeicGender','bmicat','LeicRace','hemda','wstva','LeicHBP','rYdiabe']
+labels = ['LeicAge','LeicGender','bmicat','hemda','everHighGlu', 'eatVegFru',
+'physActive', 'rYdiabe']
 
 to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
 'bmicat': ["'1.underweight less than 18.5'",
  "'2.normal weight from 18.5 to 24.9'", "'3.pre-obesity from 25 to 29.9'",
  "'4.obesity class 1 from 30 to 34.9'", "'5.obesity class 2 from 35 to 39.9'",
   "'6.obesity class 3 greater than 40'"],
-'LeicRace': [0, 6], 'hemda': ["'Not applicable'", 'Yes', 'No'],
- 'wstva':[],'LeicHBP': ['No', 'Yes'], 'rYdiabe': ['0.no', '1.yes']
+   'hemda': ["'Not applicable'", 'Yes', 'No'], 'everHighGlu':
+    ['No', "'Not applicable'", 'Yes'], 'eatVegFru': ['Yes', 'No'],
+     'physActive':['Yes','No'], 'rYdiabe': ['0.no', '1.yes']
 }
 
 values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
- 'bmicat': [1, 2, 3, 4, 5, 6],'LeicRace': [0, 6],
- 'hemda': [0, 1, 2], 'wstva':[],'LeicHBP':[0,1],'rYdiabe': [0, 1]}
+ 'bmicat': [1, 2, 3, 4, 5, 6],'hemda': [0, 1, 2], 'everHighGlu': [0, 1, 2],
+ 'eatVegFru': [0,1], 'physActive':[0, 1], 'rYdiabe': [0, 1]}
 
-path = 'LeicLog.csv'
+path = 'FINDLog.csv'
 data = processing(all_labels, labels, to_replace, values, path)
 # Apply machine learning techniques
 X = data[labels[:-1]] # get the features
@@ -48,7 +49,7 @@ aucs = np.zeros((10, 8, 100)) # initialize an array to store aucs
 for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
     for i in range(0,10): # run through 10 different stratified datasets
        j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
-       X_train, X_test, y_train, y_test = train_test_split(X, y,train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
+       X_train, X_test, y_train, y_test = train_test_split(X, y,train_size= 0.7,test_size=0.03, stratify=y) # stratified train/test split 70/30
        for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:#evaluate each dataset over 8 different C values
            clf = LogisticRegression(C=c, solver='liblinear',penalty='l2').fit(X_train, y_train) # train classifier over a dataset for C values
            y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
@@ -70,8 +71,7 @@ thresholds = np.linspace(0, 1, 100) # make a thr space to iterate over
 for thr in tqdm.tqdm(thresholds): # for different threshold values
     younden = list() # initialize a list to save younden index for every 10-group evaluation
     for i in range(0,10): #for every dataset       # TRUE NEGATIVE RATE = SPECIFICITY
-       X_train, X_test, y_train, y_test = train_test_split(X, y, 
-       train_size=0.7,test_size=0.3,
+       X_train, X_test, y_train, y_test = train_test_split(X, y, train_size= 0.7,test_size=0.03,
         stratify=y) # stratified train test split 70/30
        clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
        y_pred = (clf.predict_proba(X_test)[:,1] >= thr).astype(bool)# predict using current thr
@@ -105,9 +105,8 @@ plt.show()
 # using the best threshold which calculated before and the best c, evaluate the final dataset
 younden_final = list()
 for i in tqdm.tqdm(range(0,10)):                                      # TRUE NEGATIVE RATE = SPECIFICITY
-    X_train, X_test, y_train, y_test = train_test_split(X, y, 
-    train_size=0.7,test_size=0.3, stratify=y)
-    clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size= 0.7,test_size=0.03, stratify=y)
+    clf = LogisticRegression(C=10, solver='liblinear', penalty='l2').fit(X_train, y_train)
     y_pred = (clf.predict_proba(X_test)[:,1] >= optimal[3]).astype(bool)
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     specificity = tn/(tn+fp)

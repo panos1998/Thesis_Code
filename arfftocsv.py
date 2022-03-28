@@ -23,10 +23,11 @@ def dataEncoding(df: pd.DataFrame, labels: list, to_replace: dict, values: dict,
     df[labels].to_csv(path, header= True, index_label= False, index= False)
     return df[labels]
 
-# this function implements all the pipeline of csv formating, labeling placement and encoding of specific features
+# this function places the labels for each model and converts categorical to numerical data
 def processing (all_labels: list, labels: list, to_replace: dict, values: dict, path, source: str = 'diabetes_paper_fazakis.csv',
  des: str  ='Finaldata.csv')-> pd.DataFrame:
  arfftocsv(source)
  df = labelize(des, all_labels)
  return dataEncoding(df, labels, to_replace, values, path)
+ 
  
