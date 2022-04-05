@@ -1,15 +1,16 @@
 #%%
 from turtle import width
-from arfftocsv import arfftocsv, labelize, dataEncoding, processing
+from arfftocsv import processing
 import numpy as np
 import pandas as pd
 import tqdm
+
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
-
+# this function deletes @ and empty lines so that produce a 
 labels = ['LeicAge','LeicGender','bmicat','LeicRace','hemda','wstva','LeicHBP','rYdiabe']
 
 to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
@@ -26,7 +27,7 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
  'hemda': [0, 1, 2], 'wstva':[],'LeicHBP':[0,1],'rYdiabe': [0, 1]}
 
 path = 'LeicLog.csv'
-data = processing(all_labels, labels, to_replace, values, path)
+data = processing(labels=labels, to_replace=to_replace,all_labels=all_labels, values= values, path=path)
 # Apply machine learning techniques
 X = data[labels[:-1]] # get the features
 y = data[labels[len(labels)-1]] # get the target class
