@@ -43,6 +43,7 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
 
 path = 'NBayes.csv'
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels, values= values, path=path)
+data2 = data.dropna(axis =1 )
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, KNNImputer, SimpleImputer
 imp = KNNImputer(n_neighbors=1)
@@ -50,8 +51,8 @@ x =imp.fit_transform(data)
 data = pd.DataFrame(x, columns=all_labels)
 #%%
 #print(pd.isna(data).sum())
-X = data[all_labels[:-1]] # get the features
-y= data[all_labels[len(all_labels)-1]]#data[all_labels[len(all_labels)-1]] # get the target class
+X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
+y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
 #from mixed_naive_bayes import MixedNB
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
@@ -93,7 +94,7 @@ for i in range(0, 10):
       X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
        train_size=0.7, stratify=y)
       clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=optimal[3]).astype(bool)
+      y_pred =(clf.predict_proba(X_test)[:,1]>=optimal[3]).astype(bool) #0.008 πολυ καλο
       tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
       specificity = tn/(tn+fp)
       sensitivity = tp/(tp+fn)
