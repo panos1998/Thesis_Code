@@ -43,19 +43,26 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
 
 path = 'NBayes.csv'
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels, values= values, path=path)
+"""
+Filling missing values by mean/mode 
+data.fillna(
+   data[['drinkd_e','itot','cfoodo1m','chol','hdl','ldl','trig','sys1','dias3', 'fglu','hba1c']].mean(), inplace=True
+)
+data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
+data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
+data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 data2 = data.dropna(axis =1 )
+"""
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, KNNImputer, SimpleImputer
 imp = KNNImputer(n_neighbors=1)
 x =imp.fit_transform(data)
 data = pd.DataFrame(x, columns=all_labels)
-#%%
 #print(pd.isna(data).sum())
 X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
 y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
-#from mixed_naive_bayes import MixedNB
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
+from sklearn.metrics import confusion_matrix, roc_auc_score
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 #Evaluate model capability by measuring AUC
@@ -99,6 +106,9 @@ for i in range(0, 10):
       specificity = tn/(tn+fp)
       sensitivity = tp/(tp+fn)
       younden.append([specificity+sensitivity-1,specificity, sensitivity])
+younden = np.array(younden)
 mean = np.mean(younden, axis=0)
 print(mean)
+print('Max specificity: ',np.max(younden[:,1]), ' Max sensitivity: ', np.max(younden[:,2]))
+print('Min specificity: ',np.min(younden[:,1]), ' Min sensitivity: ', np.min(younden[:,2]))
 # %%
