@@ -70,6 +70,7 @@ x =imp.fit_transform(data)
 data = pd.DataFrame(x, columns=all_labels)
 #print(pd.isna(data).sum())
 """
+####Find best max depth##################
 X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
 y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
 from sklearn.tree  import DecisionTreeClassifier 
@@ -85,22 +86,59 @@ for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
     for i in range(0,10): # run through 10 different stratified datasets
        j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
        X_train, X_test, y_train, y_test = train_test_split(X, y,train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
-       for msl in np.linspace(0.01,0.5,10):#evaluate each dataset over 5 different C values
-           clf = DecisionTreeClassifier(max_depth=5, min_samples_split=0.01, min_samples_leaf=msl).fit(X_train, y_train) # train classifier over a dataset for C values
+       for d in np.linspace(1, 10, 10):#evaluate each dataset over 5 different C values
+           clf = DecisionTreeClassifier(max_depth=d).fit(X_train, y_train) # train classifier over a dataset for C values
            y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
            fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
            aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
            j = j + 1                                      # for each dataset for each epoch
 means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datasets and epochs
 print(means)
-plt1 = plt.figure(1)
-plt.xlabel('Min samples split')
-plt.ylabel('Mean AUC')
-plt.plot(np.linspace(0.01,0.5,10), means)
-
-######
+fig, ax = plt.subplots(3,1)
+fig.tight_layout()
+ax[0].set_xlabel('Max depth')
+ax[0].set_ylabel('Mean AUC')
+ax[0].plot(np.linspace(1,10,10), means)
+#%%
+###### Find best min samples_split#################
+aucs = np.zeros((10, 10, 100))
+means = list()
+for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
+    for i in range(0,10): # run through 10 different stratified datasets
+       j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
+       X_train, X_test, y_train, y_test = train_test_split(X, y,train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
+       for mss in np.linspace(0.01,0.1,10):#evaluate each dataset over 5 different C values
+           clf = DecisionTreeClassifier(max_depth=4, min_samples_split=mss).fit(X_train, y_train) # train classifier over a dataset for C values
+           y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
+           fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
+           aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
+           j = j + 1                                      # for each dataset for each epoch
+means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datasets and epochs
+print(means)
+ax[1].set_xlabel('Min samples split')
+ax[1].plot(np.linspace(0.01,0.1,10), means)
+#%%
+##############Find best min samples leaf#############
+aucs = np.zeros((10, 10, 100))
+means = list()
+for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
+    for i in range(0,10): # run through 10 different stratified datasets
+       j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
+       X_train, X_test, y_train, y_test = train_test_split(X, y,train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
+       for msl in np.linspace(0.01,0.1,10):#evaluate each dataset over 5 different C values
+           clf = DecisionTreeClassifier(max_depth=4, min_samples_split=0.03, min_samples_leaf=msl).fit(X_train, y_train) # train classifier over a dataset for C values
+           y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
+           fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
+           aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
+           j = j + 1                                      # for each dataset for each epoch
+means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datasets and epochs
+print(means)
+ax[2].set_xlabel('Min samples split')
+ax[2].plot(np.linspace(0.01,0.1,10), means)
+#%%
+##########################
 roc = list()
-clf = DecisionTreeClassifier(max_depth=5, min_samples_split=0.01, min_samples_leaf=0.01)
+clf = DecisionTreeClassifier(max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
 for i in tqdm.tqdm(range(0,10)):
    X_train, X_test, y_train, y_test = train_test_split(X, y,
     test_size=0.3, train_size=0.7, stratify=y)
@@ -151,4 +189,6 @@ dot_data = tree.export_graphviz(clf, out_file='tree2.dot',
                      filled=True, rounded=True,  
                      special_characters=True)  
 graph = graphviz.Source(dot_data) 
+plt.show()
+
 # %%
