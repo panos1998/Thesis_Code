@@ -73,12 +73,34 @@ data = pd.DataFrame(x, columns=all_labels)
 X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
 y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
 from sklearn.tree  import DecisionTreeClassifier 
-from sklearn.metrics import confusion_matrix, roc_auc_score
+from sklearn import tree
+from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 #Evaluate model capability by measuring AUC
+import graphviz 
+aucs = np.zeros((10, 10, 100)) # initialize an array to store aucs
+#for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
+for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
+    for i in range(0,10): # run through 10 different stratified datasets
+       j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
+       X_train, X_test, y_train, y_test = train_test_split(X, y,train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
+       for msl in np.linspace(0.01,0.5,10):#evaluate each dataset over 5 different C values
+           clf = DecisionTreeClassifier(max_depth=5, min_samples_split=0.01, min_samples_leaf=msl).fit(X_train, y_train) # train classifier over a dataset for C values
+           y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
+           fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
+           aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
+           j = j + 1                                      # for each dataset for each epoch
+means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datasets and epochs
+print(means)
+plt1 = plt.figure(1)
+plt.xlabel('Min samples split')
+plt.ylabel('Mean AUC')
+plt.plot(np.linspace(0.01,0.5,10), means)
+
+######
 roc = list()
-clf = DecisionTreeClassifier()
+clf = DecisionTreeClassifier(max_depth=5, min_samples_split=0.01, min_samples_leaf=0.01)
 for i in tqdm.tqdm(range(0,10)):
    X_train, X_test, y_train, y_test = train_test_split(X, y,
     test_size=0.3, train_size=0.7, stratify=y)
@@ -106,6 +128,7 @@ for thr in tqdm.tqdm(thresholds):
    sum(you[2] for you in younden)/ len(younden), thr))
 optimal = max(scores, key=lambda score: score[0])
 print('Maximum younden,specificity, sensitivity, threshold ', optimal)
+
 # Final evaluation with threshold optimization
 younden = list()
 for i in range(0, 10):
@@ -122,4 +145,10 @@ mean = np.mean(younden, axis=0)
 print(mean)
 print('Max specificity: ',np.max(younden[:,1]), ' Max sensitivity: ', np.max(younden[:,2]))
 print('Min specificity: ',np.min(younden[:,1]), ' Min sensitivity: ', np.min(younden[:,2]))
+dot_data = tree.export_graphviz(clf, out_file='tree2.dot', 
+                     feature_names=all_labels[:-1],  
+                     class_names=['No', 'Yes'],  
+                     filled=True, rounded=True,  
+                     special_characters=True)  
+graph = graphviz.Source(dot_data) 
 # %%
