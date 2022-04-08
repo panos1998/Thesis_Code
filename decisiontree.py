@@ -56,7 +56,6 @@ data['sys1'] = data['sys1'].fillna(data['sys1'].mean())
 data['dias3'] = data['dias3'].fillna(data['dias3'].mean())
 data['fglu'] = data['fglu'].fillna(data['fglu'].mean())
 data['hba1c'] = data['hba1c'].fillna(data['hba1c'].mean())
-
 data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
 data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
 data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
@@ -95,7 +94,6 @@ for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
 means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datasets and epochs
 print(means)
 fig, ax = plt.subplots(3,1)
-fig.tight_layout()
 ax[0].set_xlabel('Max depth')
 ax[0].set_ylabel('Mean AUC')
 ax[0].plot(np.linspace(1,10,10), means)
@@ -189,6 +187,7 @@ dot_data = tree.export_graphviz(clf, out_file='tree2.dot',
                      filled=True, rounded=True,  
                      special_characters=True)  
 graph = graphviz.Source(dot_data) 
-plt.show()
+fig.tight_layout()
+fig
 
 # %%
