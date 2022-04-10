@@ -5,6 +5,11 @@ from arfftocsv import processing
 import numpy as np
 import pandas as pd
 import tqdm
+from pymoo.core.problem import ElementwiseProblem
+from pymoo.optimize import minimize
+from pymoo.algorithms.moo.nsga2 import NSGA2
+from pymoo.factory import get_sampling, get_crossover, get_mutation, get_termination
+
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
@@ -68,35 +73,58 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
-RF = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
-estimators = [('lr', LR), ('rf', RF)]
-clf = VotingClassifier(estimators=estimators, voting='soft', weights=[0.4, 0.6])
+
+#clf = VotingClassifier(estimators=estimators, voting='soft', weights=[0.4, 0.6])
 ##auc evaluation####
 #using auc and sensitivity we must find the pareto front with nsga2
 def objective_function( X, y, weights: list) -> list:
+    LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
+    RF = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
+    estimators = [('lr', LR), ('rf', RF)]
     clf = VotingClassifier(estimators=estimators, voting='soft', weights=weights)
-    aucs = list()
-    sensitivities = list()
-    for i in range(0,10):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-        train_size=0.7, stratify=y)
-        clf.fit(X_train,y_train)
-        y_pred =clf.predict(X_test)
-        tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-        sensitivity = tp/(tp+fn)
-        sensitivities.append(sensitivity)
-        aucs.append(roc_auc_score(y_test, y_pred))
-    mean_aucs = np.mean(aucs)
-    mean_sens = np.mean(sensitivities)
-    print('Mean AUC: ', mean_aucs,' Mean sensitivity: ', mean_sens)
-    return [mean_aucs, mean_sens]
-auc, sensi = objective_function(X, y, [0.3, 0.7])
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
+    train_size=0.7, random_state=1, stratify=y)
+    clf.fit(X_train,y_train)
+    y_pred =clf.predict(X_test)
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+    sensitivity = tp/(tp+fn)
+    y_pred = clf.predict_proba(X_test)[:,1]
+    auc =roc_auc_score(y_test, y_pred)
+    return -auc, -sensitivity
 #here genetic algorithm
+algorithm = NSGA2(
+    pop_size=40,
+    n_offsprings=10,
+    sampling=get_sampling("real_random"),
+    crossover=get_crossover("real_sbx", prob=0.9, eta=15),
+    mutation=get_mutation("real_pm", eta=20),
+    eliminate_duplicates=True
+)
+termination = get_termination('n_gen', 100)
+class MyProblem(ElementwiseProblem):
+   def __init__(self):
+      super().__init__ (n_var=2,
+      n_obj=2,
+       n_constr=2,
+       xl = np.array([0,0]),
+       xu= np.array([1,1]))
+   
+   def _evaluate(self, x, out,*args, **kwargs):
+      f1, f2 = objective_function(X, y, weights = x)
+      g1 = x[0] + x[1] - 1
+      g2 = -x[0] - x[1] + 0.9
+      out["F"] = [f1,f2]
+      out["G"] = g1,g2
 
-
-
-
+problem = MyProblem()
+   
+res = minimize(problem, algorithm, termination, seed=1, save_history=True, verbose=True)
+Xs = res.X
+F= res.F
+#%%
+print(Xs)
+#%%
+################
 #%%
 ########
 ####evaluate for optimal threshold##########
