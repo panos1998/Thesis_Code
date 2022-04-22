@@ -72,52 +72,6 @@ LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
 RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
 estimators = [('lr', LR), ('rf', RF)]
 clf = VotingClassifier(estimators=estimators, voting='soft')
-"""
-aucs = list()
-for i in range(0,10):
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-       train_size=0.7, stratify=y)
-      clf.fit(X_train,y_train)
-      y_pred =clf.predict_proba(X_test)[:,1]
-      aucs.append(roc_auc_score(y_test, y_pred))
-print('Mean AUC: ', np.mean(aucs), 'Max AUC: ',np.max(aucs),'Min AUC: ',np.min(aucs))
-evaluate for optimal threshold##########
-thresholds = np.linspace(0, 1, 50)
-scores = list()
-for thr in tqdm.tqdm(thresholds):
-   younden = list()
-   for i in range(0,10):
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-       train_size=0.7, stratify=y)
-      clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=thr).astype(bool)
-      tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-      specificity = tn/(tn+fp)
-      sensitivity = tp/(tp+fn)
-      younden.append([specificity+sensitivity-1,specificity, sensitivity])
-   scores.append((sum(you[0] for you in younden)/len(younden),
-   sum(you[1] for you in younden)/ len(younden), # per threshold
-   sum(you[2] for you in younden)/ len(younden), thr))
-optimal = max(scores, key=lambda score: score[0])
-print('Maximum younden,specificity, sensitivity, threshold ', optimal)
-younden = list()
-for i in tqdm.tqdm(range(0, 10)):
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-       train_size=0.7, stratify=y)
-      clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=optimal[3]).astype(bool) #0.008 πολυ καλο
-      tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-      specificity = tn/(tn+fp)
-      sensitivity = tp/(tp+fn)
-      younden.append([specificity+sensitivity-1,specificity, sensitivity])
-younden = np.array(younden)
-mean = np.mean(younden, axis=0)
-print(mean)
-print('Max specificity: ',np.max(younden[:,1]), ' Max sensitivity: ', np.max(younden[:,2]))
-
-print('Min specificity: ',np.min(younden[:,1]), ' Min sensitivity: ', np.min(younden[:,2]))
-"""
-# %%
 aucs = list()
 bests = list()
 for i in range(0,10):

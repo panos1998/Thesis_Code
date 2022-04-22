@@ -10,7 +10,6 @@ all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
-# this function deletes @ and empty lines so that produce a 
 
 to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
 'bmicat': ["'1.underweight less than 18.5'",
@@ -42,9 +41,7 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
 
 path = 'NBayes.csv'
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels, values= values, path=path)
-#Filling missing values by mean/mode 
-#data.fillna(
-  # data[['drinkd_e','itot','cfoodo1m','chol','hdl','ldl','trig','sys1','dias3', 'fglu','hba1c']].mean(), inplace=True)
+
 data['drinkd_e'] = data['drinkd_e'].fillna(data['drinkd_e'].mean())
 data['itot'] = data['itot'].fillna(data['itot'].mean())
 data['cfoodo1m'] = data['cfoodo1m'].fillna(data['cfoodo1m'].mean())
@@ -87,45 +84,6 @@ plt.xlabel('Number of trees')
 plt.ylabel('Mean AUC')
 plt.plot([100, 200, 500, 1000], means)
 #%%
-####Threshold optimization################
-"""
-thresholds = np.linspace(0, 1, 50)
-for thr in tqdm.tqdm(thresholds):
-   younden = list()
-   for i in range(0,10):
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-       train_size=0.7, stratify=y)
-      clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=thr).astype(bool)
-      tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-      specificity = tn/(tn+fp)
-      sensitivity = tp/(tp+fn)
-      younden.append([specificity+sensitivity-1,specificity, sensitivity])
-   scores.append((sum(you[0] for you in younden)/len(younden),
-   sum(you[1] for you in younden)/ len(younden), # per threshold
-   sum(you[2] for you in younden)/ len(younden), thr))
-optimal = max(scores, key=lambda score: score[0])
-print('Maximum younden,specificity, sensitivity, threshold ', optimal)
-"""
-"""
-# Final evaluation with threshold optimization
-younden = list()
-for i in range(0, 10):
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-       train_size=0.7, stratify=y)
-      clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=optimal[3]).astype(bool) #0.008 πολυ καλο
-      tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-      specificity = tn/(tn+fp)
-      sensitivity = tp/(tp+fn)
-      younden.append([specificity+sensitivity-1,specificity, sensitivity])
-younden = np.array(younden)
-mean = np.mean(younden, axis=0)
-print(mean)
-print('Max specificity: ',np.max(younden[:,1]), ' Max sensitivity: ', np.max(younden[:,2]))
-print('Min specificity: ',np.min(younden[:,1]), ' Min sensitivity: ', np.min(younden[:,2]))
-"""
-# %%
 aucs = list()
 bests = list()
 clf = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05 )
@@ -138,7 +96,6 @@ for i in tqdm.tqdm(range(0,10)):
    fpr, tpr, thr= roc_curve(y_test, probs)
    metrics = [(tp,1-fp, th) for tp, fp, th in zip(tpr, fpr, thr)]
    bests.append(max(metrics, key=lambda tuple: tuple[0]+tuple[1]))
-   #print(metrics)
 print('best AUC: ',np.max(aucs), 'mean AUC: ', np.mean(aucs),'min AUC: ', np.min(aucs))
 best = max(bests,key=lambda tuple:tuple[0]+tuple[1])
 best_array=np.array(bests)

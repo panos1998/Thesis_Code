@@ -35,15 +35,7 @@ from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-"""
-clf = LogisticRegressionCV(cv=5).fit(X, y)
-y_pred = (clf.predict_proba(X)[:,1]>=0.148).astype(bool)
-tn, fp, fn, tp = confusion_matrix(y, y_pred).ravel() # get confusion matrix
-specificity = tn/(tn+fp) # calculate specificity
-sensitivity = tp/(tp+fn) # calculate sensitivity
-print(specificity, sensitivity)
-print(clf.get_params().items())
-"""
+
 aucs = np.zeros((10, 8, 100)) # initialize an array to store aucs
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
 for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
@@ -66,71 +58,7 @@ plt.plot(['0.0001', '0.001', '0.01', '0.1', '1', '10', '100', '1000'], means)
 #Υπαρχει μια απόκλιση 4%
 #Εδω θα βαλουμε αυριο το κωδικα για να βρουμε το threshold, να ψαξω αν πρωτα πρεπει να κανω  training  και μετα hyper
 # parameters ή βολευει οπως το εκανα
-"""
-scores = list() # initialize a list to save scores
-thresholds = np.linspace(0, 1, 100) # make a thr space to iterate over
-for thr in tqdm.tqdm(thresholds): # for different threshold values
-    younden = list() # initialize a list to save younden index for every 10-group evaluation
-    for i in range(0,10): #for every dataset       # TRUE NEGATIVE RATE = SPECIFICITY
-       X_train, X_test, y_train, y_test = train_test_split(X, y, train_size= 0.7,test_size=0.03,
-        stratify=y) # stratified train test split 70/30
-       clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
-       y_pred = (clf.predict_proba(X_test)[:,1] >= thr).astype(bool)# predict using current thr
-       tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel() # get confusion matrix
-       specificity = tn/(tn+fp) # calculate specificity
-       sensitivity = tp/(tp+fn) # calculate sensitivity
-       younden.append((specificity+sensitivity-1,specificity, sensitivity))# store metrics for each dataset
-    scores.append((sum(you[0] for you in younden)/ len(younden), #mean score for every 10-group
-    sum(you[1] for you in younden)/ len(younden), # per threshold
-    sum(you[2] for you in younden)/ len(younden), thr))
-params =list(clf.get_params().values())  # get classifier parameters
-optimal =max(scores, key=lambda score: score[0]) # best metrics over all thresholds
-print('Maximum younden,specificity, sensitivity, threshold, c and penalty ',optimal,params[0], params[9])
-plt2 = plt.figure(2)
-plt.ylabel('Younden index')
-plt.xlabel('Threshold value')
-plt.annotate('Max',[optimal[3],optimal[0]],
-arrowprops=dict(facecolor='red', headwidth=7, headlength =5))
-plt.plot([x[3] for x in scores], [x[0] for x in scores])
-plt.axhline(y = optimal[0], xmax=optimal[3]*(1.15), linestyle ='--', color = 'red' )
-plt.axvline(optimal[3], linestyle ='--', color = 'red')
-plt.show()
-"""
-# l1 c = 10, 0.377 για  τα 10 μεγαλα dataset
-#ωρα για τα 10 μικρα l1 c = 10 0.4279 0.2020 ρεαλιστικα 0.41 με 0.151
-# l2 c = 1000 0.445 0.161 realistika 0.412 thr 0.151, y 0.44 sp 0.62, sens 0.82 thr 0.134
-# τελικη επιλογη l2 γιατι ειναι αρκετα γρηγοροτερη και c = 100
-
-
-### FINAL EVALUATION ######
-# using the best threshold which calculated before and the best c, evaluate the final dataset
-"""
-younden_final = list()
-for i in tqdm.tqdm(range(0,10)):                                      # TRUE NEGATIVE RATE = SPECIFICITY
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size= 0.7,test_size=0.03, stratify=y)
-    clf = LogisticRegression(C=10, solver='liblinear', penalty='l2').fit(X_train, y_train)
-    y_pred = (clf.predict_proba(X_test)[:,1] >= optimal[3]).astype(bool)
-    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-    specificity = tn/(tn+fp)
-    sensitivity = tp/(tp+fn)
-    younden_final.append((specificity+sensitivity-1,specificity, sensitivity))
-younden_final = np.array(younden_final)
-fig, ax = plt.subplots(3, 1)
-fig.tight_layout()
-ax[0].plot(younden_final[:,0])
-ax[1].plot(younden_final[:,1])
-ax[2].plot(younden_final[:,2])
-ax[0].set_ylabel('Younden Index')
-ax[2].set_ylabel('Sensitivity')
-ax[1].set_ylabel('Specificity')
-plt.show()
-print('Average Scores: ',np.mean(younden_final, axis=0))
-print('Max Specificity,''Sensitivity: ',
-np.amax(younden_final, axis=0)[1:3])
-print('Min Specificity, Sensitivity: ',
-np.amin(younden_final, axis=0)[1:3])
-"""
-# %%
+#%%
 clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
 aucs = list()
 bests = list()

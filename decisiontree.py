@@ -60,14 +60,6 @@ data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
 data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 #data2 = data.dropna(axis =1 )
 
-"""
-from sklearn.experimental import enable_iterative_imputer
-from sklearn.impute import IterativeImputer, KNNImputer, SimpleImputer
-imp = KNNImputer(n_neighbors=3)
-x =imp.fit_transform(data)
-data = pd.DataFrame(x, columns=all_labels)
-#print(pd.isna(data).sum())
-"""
 ####Find best max depth##################
 X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
 y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
@@ -132,63 +124,11 @@ means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datas
 print(means)
 ax[2].set_xlabel('Min samples split')
 ax[2].plot(np.linspace(0.01,0.1,10), means)
-#%%
-##########################
-roc = list()
-clf = DecisionTreeClassifier(max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
-"""
-for i in tqdm.tqdm(range(0,10)):
-   X_train, X_test, y_train, y_test = train_test_split(X, y,
-    test_size=0.3, train_size=0.7, stratify=y)
-   clf.fit(X_train,y_train)
-   y_pred =clf.predict_proba(X_test)[:,1]
-   roc.append(roc_auc_score(y_test, y_pred))
-print(np.mean(roc))
-"""
-"""
-roc = list()
-scores = list()
-#Find- proof the best threshold closest to paper
-thresholds = np.linspace(0, 1, 100)
-for thr in tqdm.tqdm(thresholds):
-   younden = list()
-   for i in range(0,10):
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-       train_size=0.7, stratify=y)
-      clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=thr).astype(bool)
-      tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-      specificity = tn/(tn+fp)
-      sensitivity = tp/(tp+fn)
-      younden.append([specificity+sensitivity-1,specificity, sensitivity])
-   scores.append((sum(you[0] for you in younden)/len(younden),
-   sum(you[1] for you in younden)/ len(younden), # per threshold
-   sum(you[2] for you in younden)/ len(younden), thr))
-optimal = max(scores, key=lambda score: score[0])
-print('Maximum younden,specificity, sensitivity, threshold ', optimal)
-
-# Final evaluation with threshold optimization
-younden = list()
-for i in range(0, 10):
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-       train_size=0.7, stratify=y)
-      clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=optimal[3]).astype(bool) #0.008 πολυ καλο
-      tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-      specificity = tn/(tn+fp)
-      sensitivity = tp/(tp+fn)
-      younden.append([specificity+sensitivity-1,specificity, sensitivity])
-younden = np.array(younden)
-mean = np.mean(younden, axis=0)
-print(mean)
-print('Max specificity: ',np.max(younden[:,1]), ' Max sensitivity: ', np.max(younden[:,2]))
-print('Min specificity: ',np.min(younden[:,1]), ' Min sensitivity: ', np.min(younden[:,2]))
-"""
-
 
 # %%
 aucs = list()
 bests = list()
+clf = DecisionTreeClassifier(max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
 for i in range(0,10):
    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
        train_size=0.7, stratify=y)

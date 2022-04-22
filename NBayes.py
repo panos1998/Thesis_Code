@@ -43,16 +43,7 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
 
 path = 'NBayes.csv'
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels, values= values, path=path)
-"""
-Filling missing values by mean/mode 
-data.fillna(
-   data[['drinkd_e','itot','cfoodo1m','chol','hdl','ldl','trig','sys1','dias3', 'fglu','hba1c']].mean(), inplace=True
-)
-data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
-data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
-data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
-data2 = data.dropna(axis =1 )
-"""
+
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, KNNImputer, SimpleImputer
 from sklearn.metrics import roc_curve
@@ -69,35 +60,6 @@ import matplotlib.pyplot as plt
 #Evaluate model capability by measuring AUC
 roc = list()
 clf = GaussianNB()
-"""
-for i in tqdm.tqdm(range(0,10)):
-   X_train, X_test, y_train, y_test = train_test_split(X, y,
-    test_size=0.3, train_size=0.7, stratify=y)
-   clf.fit(X_train,y_train)
-   y_pred =clf.predict_proba(X_test)[:,1]
-   roc.append(roc_auc_score(y_test, y_pred))
-print(np.mean(roc), np.max(roc), np.min(roc))
-roc = list()
-scores = list()
-#Find- proof the best threshold closest to paper
-thresholds = np.linspace(0, 1, 1000)
-for thr in tqdm.tqdm(thresholds):
-   younden = list()
-   for i in range(0,10):
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-       train_size=0.7, stratify=y)
-      clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=thr).astype(bool)
-      tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-      specificity = tn/(tn+fp)
-      sensitivity = tp/(tp+fn)
-      younden.append([specificity+sensitivity-1,specificity, sensitivity])
-   scores.append((sum(you[0] for you in younden)/len(younden),
-   sum(you[1] for you in younden)/ len(younden), # per threshold
-   sum(you[2] for you in younden)/ len(younden), thr))
-optimal = max(scores, key=lambda score: score[0])
-print('Maximum younden,specificity, sensitivity, threshold ', optimal)
-"""
 # Final evaluation with threshold optimization
 aucs = list()
 bests = list()
