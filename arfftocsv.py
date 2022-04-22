@@ -1,4 +1,5 @@
 from operator import index
+import numpy as np
 import pandas as pd
 import csv
 # this function deletes @ and empty lines so that produce a no-header csv
@@ -24,7 +25,7 @@ def dataEncoding(df: pd.DataFrame, labels: list, to_replace: dict, values: dict,
     return df[labels]
 
 # this function places the labels for each model and converts categorical to numerical data
-def processing ( all_labels: list,labels: list, to_replace: dict, values: dict, path, source: str = 'diabetes_paper_fazakis.csv',
+def processing ( all_labels: list,labels: list, to_replace: dict, values: dict, path: str = 'all.csv', source: str = 'diabetes_paper_fazakis.csv',
  des: str  ='Finaldata.csv')-> pd.DataFrame:
  arfftocsv(source)
  df = labelize(des, all_labels)
