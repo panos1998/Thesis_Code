@@ -79,7 +79,7 @@ import matplotlib.pyplot as plt
 #using auc and sensitivity we must find the pareto front with nsga2
 def objective_function( X, y, weights: list) -> list:
     LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
-    RF = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
+    RF = RandomForestClassifier(n_estimators=100, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
     estimators = [('lr', LR), ('rf', RF)]
     clf = VotingClassifier(estimators=estimators, voting='soft', weights=weights)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
@@ -93,14 +93,14 @@ def objective_function( X, y, weights: list) -> list:
     return -auc, -sensitivity
 #here genetic algorithm
 algorithm = NSGA2(
-    pop_size=40,
-    n_offsprings=10,
+    pop_size=100,
+    n_offsprings=15,
     sampling=get_sampling("real_random"),
-    crossover=get_crossover("real_sbx", prob=0.9, eta=15),
-    mutation=get_mutation("real_pm", eta=20),
+    crossover=get_crossover("real_sbx", prob=0.8, eta=10),
+    mutation=get_mutation("real_pm", eta=10),
     eliminate_duplicates=True
 )
-termination = get_termination('n_gen', 100)
+termination = get_termination('n_gen', 50)
 class MyProblem(ElementwiseProblem):
    def __init__(self):
       super().__init__ (n_var=2,
@@ -112,7 +112,7 @@ class MyProblem(ElementwiseProblem):
    def _evaluate(self, x, out,*args, **kwargs):
       f1, f2 = objective_function(X, y, weights = x)
       g1 = x[0] + x[1] - 1
-      g2 = -x[0] - x[1] + 0.9
+      g2 = -x[0] - x[1] + 0.99
       out["F"] = [f1,f2]
       out["G"] = g1,g2
 
@@ -122,12 +122,40 @@ res = minimize(problem, algorithm, termination, seed=1, save_history=True, verbo
 Xs = res.X
 F= res.F
 #%%
+LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
+RF = RandomForestClassifier(n_estimators=100, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
+estimators = [('lr', LR), ('rf', RF)]
+weights = Xs[3]
+clf= VotingClassifier(estimators=estimators, voting='soft', weights=weights)
+plt.scatter(Xs[:,0], Xs[:,1], s=30, facecolors='none', edgecolors='r')
+plt.title('Design Space')
+plt.show()
+plt.scatter(-F[:, 0], -F[:, 1], s=30, facecolors='none', edgecolors='blue')
+plt.title("Objective Space")
+plt.show()
 print(Xs)
-#%%
-################
-#%%
-########
-####evaluate for optimal threshold##########
+
+# %%
+aucs = list()
+bests = list()
+for i in range(0,10):
+   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
+       train_size=0.7, stratify=y)
+   clf.fit(X_train,y_train)
+   probs = clf.predict_proba(X_test)[:,1]
+   aucs.append(roc_auc_score(y_test, probs))
+   fpr, tpr, thr= roc_curve(y_test, probs)
+   metrics = [(tp,1-fp, th) for tp, fp, th in zip(tpr, fpr, thr)]
+   bests.append(max(metrics, key=lambda tuple: tuple[0]+tuple[1]))
+   #print(metrics)
+print('best AUC: ',np.max(aucs), 'mean AUC: ', np.mean(aucs),'min AUC: ', np.min(aucs))
+best = max(bests,key=lambda tuple:tuple[0]+tuple[1])
+best_array=np.array(bests)
+print('Max sens: ',np.max(best_array[:,0]),'Min sens: ', np.min(best_array[:,0]))
+print('Max spec: ',np.max(best_array[:,1]),'Min spec: ', np.min(best_array[:,1]))
+print('J: ', best[0]+best[1]-1,'Threshold: ', best[2],'sensitivity: ', best[0],'specificity: ',best[1])
+# %%
+"""
 thresholds = np.linspace(0, 1, 100)
 scores = list()
 for thr in tqdm.tqdm(thresholds):
@@ -146,21 +174,26 @@ for thr in tqdm.tqdm(thresholds):
    sum(you[2] for you in younden)/ len(younden), thr))
 optimal = max(scores, key=lambda score: score[0])
 print('Maximum younden,specificity, sensitivity, threshold ', optimal)
-######validate model#######
-#%%
+"""
+"""
 younden = list()
+aucs = list()
 for i in range(0, 10):
       X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
        train_size=0.7, stratify=y)
       clf.fit(X_train,y_train)
-      y_pred =(clf.predict_proba(X_test)[:,1]>=optimal[3]).astype(bool) #0.008 πολυ καλο
+      probs = clf.predict_proba(X_test)[:,1]
+      y_pred =(probs>=optimal[3]).astype(bool) #0.008 πολυ καλο
       tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
       specificity = tn/(tn+fp)
       sensitivity = tp/(tp+fn)
+      aucs.append(roc_auc_score(y_test, probs))
       younden.append([specificity+sensitivity-1,specificity, sensitivity])
 younden = np.array(younden)
 mean = np.mean(younden, axis=0)
 print(mean)
 print('Max specificity: ',np.max(younden[:,1]), ' Max sensitivity: ', np.max(younden[:,2]))
 print('Min specificity: ',np.min(younden[:,1]), ' Min sensitivity: ', np.min(younden[:,2]))
-# %%
+print('AUCS')
+print('mean: ', np.mean(aucs), 'max: ', np.max(aucs),'min: ', np.min(aucs))
+"""

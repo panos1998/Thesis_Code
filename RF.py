@@ -88,7 +88,7 @@ plt.ylabel('Mean AUC')
 plt.plot([100, 200, 500, 1000], means)
 #%%
 ####Threshold optimization################
-clf = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05 )
+"""
 thresholds = np.linspace(0, 1, 50)
 for thr in tqdm.tqdm(thresholds):
    younden = list()
@@ -106,7 +106,8 @@ for thr in tqdm.tqdm(thresholds):
    sum(you[2] for you in younden)/ len(younden), thr))
 optimal = max(scores, key=lambda score: score[0])
 print('Maximum younden,specificity, sensitivity, threshold ', optimal)
-
+"""
+"""
 # Final evaluation with threshold optimization
 younden = list()
 for i in range(0, 10):
@@ -123,4 +124,25 @@ mean = np.mean(younden, axis=0)
 print(mean)
 print('Max specificity: ',np.max(younden[:,1]), ' Max sensitivity: ', np.max(younden[:,2]))
 print('Min specificity: ',np.min(younden[:,1]), ' Min sensitivity: ', np.min(younden[:,2]))
+"""
+# %%
+aucs = list()
+bests = list()
+clf = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05 )
+for i in tqdm.tqdm(range(0,10)):
+   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
+       train_size=0.7, stratify=y)
+   clf.fit(X_train,y_train)
+   probs = clf.predict_proba(X_test)[:,1]
+   aucs.append(roc_auc_score(y_test, probs))
+   fpr, tpr, thr= roc_curve(y_test, probs)
+   metrics = [(tp,1-fp, th) for tp, fp, th in zip(tpr, fpr, thr)]
+   bests.append(max(metrics, key=lambda tuple: tuple[0]+tuple[1]))
+   #print(metrics)
+print('best AUC: ',np.max(aucs), 'mean AUC: ', np.mean(aucs),'min AUC: ', np.min(aucs))
+best = max(bests,key=lambda tuple:tuple[0]+tuple[1])
+best_array=np.array(bests)
+print('Max sens: ',np.max(best_array[:,0]),'Min sens: ', np.min(best_array[:,0]))
+print('Max spec: ',np.max(best_array[:,1]),'Min spec: ', np.min(best_array[:,1]))
+print('J: ', best[0]+best[1]-1,'Threshold: ', best[2],'sensitivity: ', best[0],'specificity: ',best[1])
 # %%

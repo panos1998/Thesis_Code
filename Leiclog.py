@@ -66,6 +66,7 @@ plt.plot(['0.0001', '0.001', '0.01', '0.1', '1', '10', '100', '1000'], means)
 #Υπαρχει μια απόκλιση 4%
 #Εδω θα βαλουμε αυριο το κωδικα για να βρουμε το threshold, να ψαξω αν πρωτα πρεπει να κανω  training  και μετα hyper
 # parameters ή βολευει οπως το εκανα
+"""
 scores = list() # initialize a list to save scores
 thresholds = np.linspace(0, 1, 100) # make a thr space to iterate over
 for thr in tqdm.tqdm(thresholds): # for different threshold values
@@ -74,8 +75,9 @@ for thr in tqdm.tqdm(thresholds): # for different threshold values
        X_train, X_test, y_train, y_test = train_test_split(X, y, 
        train_size=0.7,test_size=0.3,
         stratify=y) # stratified train test split 70/30
-       clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
-       y_pred = (clf.predict_proba(X_test)[:,1] >= thr).astype(bool)# predict using current thr
+       clf = LogisticRegression(C=100, solver='liblinear', penalty='l2', tol=1e-9, max_iter=200).fit(X_train, y_train)
+       probs = clf.predict_proba(X_test)[:,1]
+       y_pred = (probs >= thr).astype(bool)# predict using current thr
        tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel() # get confusion matrix
        specificity = tn/(tn+fp) # calculate specificity
        sensitivity = tp/(tp+fn) # calculate sensitivity
@@ -101,20 +103,25 @@ plt.show()
 # l2 c = 1000 0.445 0.161 realistika 0.412 thr 0.151, y 0.44 sp 0.62, sens 0.82 thr 0.134
 # τελικη επιλογη l2 γιατι ειναι αρκετα γρηγοροτερη και c = 100
 
-
+"""
 ### FINAL EVALUATION ######
 # using the best threshold which calculated before and the best c, evaluate the final dataset
+"""
+final_auc= list()
 younden_final = list()
+clf = LogisticRegression(C=100, solver='liblinear', penalty='l2', tol=1e-9, max_iter=200).fit(X_train, y_train)
 for i in tqdm.tqdm(range(0,10)):                                      # TRUE NEGATIVE RATE = SPECIFICITY
     X_train, X_test, y_train, y_test = train_test_split(X, y, 
     train_size=0.7,test_size=0.3, stratify=y)
-    clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
-    y_pred = (clf.predict_proba(X_test)[:,1] >= optimal[3]).astype(bool)
+    probs = clf.predict_proba(X_test)[:,1]
+    y_pred = (probs >= optimal[3]).astype(bool)
+    final_auc.append(roc_auc_score(y_test, probs))
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     specificity = tn/(tn+fp)
     sensitivity = tp/(tp+fn)
     younden_final.append((specificity+sensitivity-1,specificity, sensitivity))
 younden_final = np.array(younden_final)
+print('Mean AUC: ', np.mean(final_auc), 'Max AUC: ', np.max(final_auc), 'Min AUC: ', np.min(final_auc))
 fig, ax = plt.subplots(3, 1)
 fig.tight_layout()
 ax[0].plot(younden_final[:,0])
@@ -129,4 +136,25 @@ print('Max Specificity,''Sensitivity: ',
 np.amax(younden_final, axis=0)[1:3])
 print('Min Specificity, Sensitivity: ',
 np.amin(younden_final, axis=0)[1:3])
+"""
+# %%
+clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
+aucs = list()
+bests = list()
+for i in tqdm.tqdm(range(0,10)):
+   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
+       train_size=0.7, stratify=y)
+   clf.fit(X_train,y_train)
+   probs = clf.predict_proba(X_test)[:,1]
+   aucs.append(roc_auc_score(y_test, probs))
+   fpr, tpr, thr= roc_curve(y_test, probs)
+   metrics = [(tp,1-fp, th) for tp, fp, th in zip(tpr, fpr, thr)]
+   bests.append(max(metrics, key=lambda tuple: tuple[0]+tuple[1]))
+   #print(metrics)
+print('best AUC: ',np.max(aucs), 'mean AUC: ', np.mean(aucs),'min AUC: ', np.min(aucs))
+best = max(bests,key=lambda tuple:tuple[0]+tuple[1])
+best_array=np.array(bests)
+print('Max sens: ',np.max(best_array[:,0]),'Min sens: ', np.min(best_array[:,0]))
+print('Max spec: ',np.max(best_array[:,1]),'Min spec: ', np.min(best_array[:,1]))
+print('J: ', best[0]+best[1]-1,'Threshold: ', best[2],'sensitivity: ', best[0],'specificity: ',best[1])
 # %%
