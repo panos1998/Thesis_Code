@@ -24,15 +24,15 @@ path: str) -> pd.DataFrame:
     """this function encodes explicitly the nominal values of specified labels
     and returns the dataframe with this columns"""
     for label in labels:# for each label we want to convert
-        df[label] = df[label].replace(to_replace[label], values[label])#replace the coresspoding values
+        df[label] = df[label].replace(to_replace[label], values[label])#replace the given values
     df[labels].to_csv(path, header= True, index_label= False, index= False)#save as csv
     return df[labels] # return the dataFrame
 
 def processing ( all_labels: list,labels: list, to_replace: dict, values: dict,
 path: str = 'all.csv', source: str = 'diabetes_paper_fazakis.csv',
 des: str  ='Finaldata.csv')-> pd.DataFrame:
- """this function places the labels for each model and converts categorical to numerical data"""
- function_arfftocsv(source) # transform arff to csv
- df = function_labelize(des, all_labels) # add column labels
- return function_dataEncoding(df, labels, to_replace, values, path) # encode categorical and  return the dataframe
+    """this function places the labels for each model and converts categorical to numerical data"""
+    function_arfftocsv(source) # transform arff to csv
+    df = function_labelize(des, all_labels) # add column labels
+    return function_dataEncoding(df, labels, to_replace, values, path)# encode categorical and  return dFrame
  
