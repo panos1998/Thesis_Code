@@ -1,16 +1,14 @@
-#Lets roooooooooooooooock
-#%%
-from turtle import width
-from arfftocsv import processing
 import numpy as np
-from evaluation import evaluation
-import tqdm
+from sklearn.ensemble import StackingClassifier, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from arfftocsv import processing
+from evaluation import function_evaluation
+
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
-# this function deletes @ and empty lines so that produce a 
 
 to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
 'bmicat': ["'1.underweight less than 18.5'",
@@ -47,8 +45,6 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels,
  values= values)
 #Filling missing values by mean/mode 
-#data.fillna(
-  # data[['drinkd_e','itot','cfoodo1m','chol','hdl','ldl','trig','sys1','dias3', 'fglu','hba1c']].mean(), inplace=True)
 data['drinkd_e'] = data['drinkd_e'].fillna(data['drinkd_e'].mean())
 data['itot'] = data['itot'].fillna(data['itot'].mean())
 data['cfoodo1m'] = data['cfoodo1m'].fillna(data['cfoodo1m'].mean())
@@ -63,17 +59,14 @@ data['hba1c'] = data['hba1c'].fillna(data['hba1c'].mean())
 data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
 data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
 data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
-#data2 = data.dropna(axis =1 )
 ####Find best max number of trees ##################
-X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
-y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
-from sklearn.ensemble import StackingClassifier, RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+X = data[all_labels[:-1]] 
+y= data[all_labels[len(all_labels)-1]]
 LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
 RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.03,
- min_samples_leaf=0.05)
+min_samples_leaf=0.05)
 metaRF = RF
 estimators = [('lr', LR), ('rf', RF)]
 clf = StackingClassifier(estimators=estimators,final_estimator=metaRF)
-evaluation(clf, X, y)
+function_evaluation(clf, X, y)
 
