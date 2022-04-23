@@ -83,7 +83,7 @@ def objective_function( X, y, weights: list) -> list:
     train_size=0.7, random_state=1, stratify=y)
     clf.fit(X_train,y_train)
     y_pred =clf.predict(X_test)
-    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+    _, _, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     sensitivity = tp/(tp+fn)
     y_pred = clf.predict_proba(X_test)[:,1]
     auc =roc_auc_score(y_test, y_pred)
@@ -99,20 +99,18 @@ algorithm = NSGA2(
 )
 termination = get_termination('n_gen', 50)
 class MyProblem(ElementwiseProblem):
-   def __init__(self):
-       super().__init__ (n_var=2,
-       n_obj=2,
-       n_constr=2,
-       xl = np.array([0,0]),
-       xu= np.array([1,1]))
-   
-   def _evaluate(self, x, out):
-       f1, f2 = objective_function(X, y, weights = x)
-       g1 = x[0] + x[1] - 1
-       g2 = -x[0] - x[1] + 0.99
-       out["F"] = [f1,f2]
-       out["G"] = g1,g2
-
+    def __init__(self):
+        super().__init__ (n_var=2,
+        n_obj=2,
+        n_constr=2,
+        xl = np.array([0,0]),
+        xu= np.array([1,1]))
+    def _evaluate(self, x, out,*args, **kwargs):
+        f1, f2 = objective_function(X, y, weights = x)
+        g1 = x[0] + x[1] - 1
+        g2 = -x[0] - x[1] + 0.99
+        out["F"] = [f1,f2]
+        out["G"] = g1,g2
 problem = MyProblem()
 res = minimize(problem, algorithm, termination, seed=1, save_history=True, verbose=True)
 Xs = res.X

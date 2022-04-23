@@ -1,8 +1,9 @@
-import numpy as np
 """import sklearn modules for train/test spliting and scoring"""
+import numpy as np
 from sklearn.metrics import  roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split
-def function_evaluation(clf,  X, y,n_iterations: int=10):    
+
+def function_evaluation(clf,  X, y,n_iterations: int=10): 
     """This function evaluates a model
 Input: a classifier, features array X, label vector y,
  number of iterations n_iterations"""
