@@ -1,5 +1,6 @@
-import pandas as pd
+""" conver arff to csv format"""
 import csv
+import pandas as pd
 
 def function_arfftocsv(source: str, dest: str = 'processed.csv'):
     """this function deletes @ and empty lines so that produce a no-header csv"""
@@ -18,7 +19,7 @@ def function_labelize(dest: str, labels: list, source: str = 'processed.csv') ->
     df.to_csv(dest, header=True, index_label=False, index=False)
     return df
 
-def function_dataEncoding(df: pd.DataFrame, labels: list, to_replace: dict, values: dict, 
+def function_dataEncoding(df: pd.DataFrame, labels: list, to_replace: dict, values: dict,
 path: str) -> pd.DataFrame:
     """this function encodes explicitly the nominal values of specified labels
     and returns the dataframe with this columns"""
@@ -27,11 +28,11 @@ path: str) -> pd.DataFrame:
     df[labels].to_csv(path, header= True, index_label= False, index= False)
     return df[labels]
 
-def processing ( all_labels: list,labels: list, to_replace: dict, values: dict, 
+def processing ( all_labels: list,labels: list, to_replace: dict, values: dict,
 path: str = 'all.csv', source: str = 'diabetes_paper_fazakis.csv',
  des: str  ='Finaldata.csv')-> pd.DataFrame:
- """this function places the labels for each model and converts categorical to 
- numerical data"""
+ """this function places the labels for each model and converts categorical to
+    numerical data"""
  function_arfftocsv(source)
  df = function_labelize(des, all_labels)
  return function_dataEncoding(df, labels, to_replace, values, path)

@@ -1,3 +1,4 @@
+"""voting evaluator"""
 import numpy as np
 from arfftocsv import processing
 from sklearn.ensemble import  RandomForestClassifier, VotingClassifier
@@ -9,7 +10,7 @@ all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
 
-to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
+to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'],
 'bmicat': ["'1.underweight less than 18.5'",
  "'2.normal weight from 18.5 to 24.9'", "'3.pre-obesity from 25 to 29.9'",
  "'4.obesity class 1 from 30 to 34.9'", "'5.obesity class 2 from 35 to 39.9'",
@@ -43,7 +44,7 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
 
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels,
  values= values)
-#Filling missing values by mean/mode 
+#Filling missing values by mean/mode
 data['drinkd_e'] = data['drinkd_e'].fillna(data['drinkd_e'].mean())
 data['itot'] = data['itot'].fillna(data['itot'].mean())
 data['cfoodo1m'] = data['cfoodo1m'].fillna(data['cfoodo1m'].mean())
@@ -59,7 +60,7 @@ data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
 data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
 data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 
-X = data[all_labels[:-1]] 
+X = data[all_labels[:-1]]
 y= data[all_labels[len(all_labels)-1]]
 LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
 RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.03,

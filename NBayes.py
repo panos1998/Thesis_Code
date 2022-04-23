@@ -1,3 +1,4 @@
+"""Naive Bayes evaluator"""
 import numpy as np
 import pandas as pd
 from sklearn.impute import KNNImputer
@@ -11,7 +12,7 @@ all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
 
-to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
+to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'],
 'bmicat': ["'1.underweight less than 18.5'",
  "'2.normal weight from 18.5 to 24.9'", "'3.pre-obesity from 25 to 29.9'",
  "'4.obesity class 1 from 30 to 34.9'", "'5.obesity class 2 from 35 to 39.9'",

@@ -1,3 +1,4 @@
+"""random forest evaluator"""
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
@@ -12,7 +13,7 @@ all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
 
-to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
+to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'],
 'bmicat': ["'1.underweight less than 18.5'",
  "'2.normal weight from 18.5 to 24.9'", "'3.pre-obesity from 25 to 29.9'",
  "'4.obesity class 1 from 30 to 34.9'", "'5.obesity class 2 from 35 to 39.9'",
@@ -62,7 +63,7 @@ data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
 data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
 data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 ####Find best max number of trees ##################
-X = data[all_labels[:-1]] 
+X = data[all_labels[:-1]]
 y= data[all_labels[len(all_labels)-1]]
 
 #Evaluate model capability by measuring AUC
@@ -70,7 +71,8 @@ scores = list()
 aucs = np.zeros((10, 4, 10)) # initialize an array to store aucs
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
 for k in tqdm.tqdm(range(10), colour='CYAN'): # for 100 epochs
-  for i in range(0,10): # run through 10 different stratified datasets
+  for i in range(0,10):
+    # run through 10 different stratified datasets
     j = 0 # TRUE NEGATIVE RATE = SPECIFICITY
     X_train, X_test, y_train, y_test = train_test_split(X, y,
     train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
