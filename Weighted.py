@@ -74,7 +74,7 @@ y= data[all_labels[len(all_labels)-1]] # get the target class
 #using auc and sensitivity we must find the pareto front with nsga2
 def objective_function( X, y, weights: list) -> list:
     """This is the vector of objective function to maximize"""
-    LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
+    LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7) 
     RF = RandomForestClassifier(n_estimators=100, max_depth=4, min_samples_split=0.03,
      min_samples_leaf=0.05)
     estimators = [('lr', LR), ('rf', RF)]
@@ -88,44 +88,43 @@ def objective_function( X, y, weights: list) -> list:
     y_pred = clf.predict_proba(X_test)[:,1]
     auc =roc_auc_score(y_test, y_pred)
     return -auc, -sensitivity
-#here genetic algorithm
+#the nsga2 algorithm initialization to solve our optimization problem
 algorithm = NSGA2(
     pop_size=100,
     n_offsprings=15,
     sampling=get_sampling("real_random"),
-    crossover=get_crossover("real_sbx", prob=0.8, eta=10),
-    mutation=get_mutation("real_pm", eta=10),
+    crossover=get_crossover("real_sbx", prob=0.8, eta=10), #crossover prob and n
+    mutation=get_mutation("real_pm", eta=10), # mutation index
     eliminate_duplicates=True
 )
 termination = get_termination('n_gen', 50)
 class MyProblem(ElementwiseProblem):
     def __init__(self):
         super().__init__ (n_var=2,
-        n_obj=2,
-        n_constr=2,
-        xl = np.array([0,0]),
-        xu= np.array([1,1]))
+        n_obj=2, # auc and sensitivity
+        n_constr=2, # w1+w2 =1
+        xl = np.array([0,0]), #lower bound
+        xu= np.array([1,1])) #upper bound
     def _evaluate(self, x, out,*args, **kwargs):
         f1, f2 = objective_function(X, y, weights = x)
-        g1 = x[0] + x[1] - 1
+        g1 = x[0] + x[1] - 1 # the 2 constraints  for w1, w2
         g2 = -x[0] - x[1] + 0.99
-        out["F"] = [f1,f2]
-        out["G"] = g1,g2
-problem = MyProblem()
-res = minimize(problem, algorithm, termination, seed=1, save_history=True, verbose=True)
-Xs = res.X
-F= res.F
+        out["F"] = [f1,f2] # export objectives
+        out["G"] = g1,g2 # export constraints
+problem = MyProblem() # initialize problem
+res = minimize(problem, algorithm, termination, seed=1, save_history=True, verbose=True)  # start solving
+Xs = res.X #  the non dominated solutions in decision space
+F= res.F # the non dominated points in objective space
 LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
 RF = RandomForestClassifier(n_estimators=100, max_depth=4, min_samples_split=0.03,
  min_samples_leaf=0.05)
 estimators = [('lr', LR), ('rf', RF)]
-weights = Xs[3]
+weights = Xs[3] # choose  the fourth non dominated point
 clf= VotingClassifier(estimators=estimators, voting='soft', weights=weights)
-plt.scatter(Xs[:,0], Xs[:,1], s=30, facecolors='none', edgecolors='r')
+plt.scatter(Xs[:,0], Xs[:,1], s=30, facecolors='none', edgecolors='r') # plot solutions
 plt.title('Design Space')
 plt.show()
-plt.scatter(-F[:, 0], -F[:, 1], s=30, facecolors='none', edgecolors='blue')
+plt.scatter(-F[:, 0], -F[:, 1], s=30, facecolors='none', edgecolors='blue') # plot Pareto optimal front
 plt.title("Objective Space")
 plt.show()
-print(Xs)
-function_evaluation(clf, X, y)
+function_evaluation(clf, X, y) #evaluate weighted classifier
