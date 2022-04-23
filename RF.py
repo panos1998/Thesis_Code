@@ -70,13 +70,15 @@ y= data[all_labels[len(all_labels)-1]]
 scores = list()
 aucs = np.zeros((10, 4, 10)) # initialize an array to store aucs
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
-for k in tqdm.tqdm(range(10), colour='CYAN'): # for 100 epochs
+for k in tqdm.tqdm(range(10), colour='CYAN'):
+  # for 100 epochs
   for i in range(0,10):
     # run through 10 different stratified datasets
     j = 0 # TRUE NEGATIVE RATE = SPECIFICITY
     X_train, X_test, y_train, y_test = train_test_split(X, y,
     train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
-    for n in [100, 200, 500, 1000]:#evaluate each dataset over 5 different C values
+    for n in [100, 200, 500, 1000]:
+      #evaluate each dataset over 5 different C values
       clf = RandomForestClassifier(n_estimators=n,max_depth=4,
       min_samples_split=0.03, min_samples_leaf=0.05).fit(X_train, y_train)# train classifier over a dataset for C values
       y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions

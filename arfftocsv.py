@@ -30,9 +30,8 @@ path: str) -> pd.DataFrame:
 
 def processing ( all_labels: list,labels: list, to_replace: dict, values: dict,
 path: str = 'all.csv', source: str = 'diabetes_paper_fazakis.csv',
- des: str  ='Finaldata.csv')-> pd.DataFrame:
- """this function places the labels for each model and converts categorical to
-    numerical data"""
+des: str  ='Finaldata.csv')-> pd.DataFrame:
+ """this function places the labels for each model and converts categorical to numerical data"""
  function_arfftocsv(source)
  df = function_labelize(des, all_labels)
  return function_dataEncoding(df, labels, to_replace, values, path)

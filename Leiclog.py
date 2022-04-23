@@ -35,12 +35,15 @@ all_labels=all_labels, values= values, path=path)
 X = data[labels[:-1]] # get the features
 y = data[labels[len(labels)-1]] # get the target class
 aucs = np.zeros((10, 8, 100)) # initialize an array to store aucs
-for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
-  for i in range(0,10): # run through 10 different stratified datasets
+for k in tqdm.tqdm(range(100), colour='CYAN'):
+  # for 100 epochs
+  for i in range(0,10):
+     # run through 10 different stratified datasets
     j = 0               # TRUE NEGATIVE RATE = SPECIFICITY
     X_train, X_test, y_train, y_test = train_test_split(X, y,train_size= 0.7,
     test_size=0.3, stratify=y) # stratified train/test split 70/30
-    for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:#evaluate each dataset over 8 different C values
+    for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:
+      #evaluate each dataset over 8 different C values
       clf = LogisticRegression(C=c, solver='liblinear',penalty='l2').fit(X_train, y_train) #train over a dataset for C values
       y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
       fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
