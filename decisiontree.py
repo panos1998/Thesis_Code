@@ -66,22 +66,22 @@ data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 ####Find best max depth##################
 X = data[all_labels[:-1]] 
 y= data[all_labels[len(all_labels)-1]]
-
 #Evaluate model capability by measuring AUC
-
 aucs = np.zeros((10, 10, 100)) # initialize an array to store aucs
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
 for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
-    for i in range(0,10):#run through 10 different stratified datasets
-       j = 0# TRUE NEGATIVE RATE = SPECIFICITY
-       X_train,X_test,y_train,y_test = train_test_split(X,y,train_size=0.7,
-       test_size=0.3,stratify=y)# stratified train/test split 70/30
-       for d in np.linspace(1, 10, 10):#evaluate each dataset over 5 different C values
-           clf = DecisionTreeClassifier(max_depth=d).fit(X_train, y_train)#for each C train
-           y_pred = (clf.predict_proba(X_test))[:,1]# get prob predictions
-           fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
-           aucs[i, j, k] =(roc_auc_score(y_test, y_pred))#3-order tensor,auc for each C
-           j = j + 1# for each dataset for each epoch
+    for i in range(0,10):
+        #run through 10 different stratified datasets
+        j = 0# TRUE NEGATIVE RATE = SPECIFICITY
+        X_train,X_test,y_train,y_test = train_test_split(X,y,train_size=0.7,
+        test_size=0.3,stratify=y)# stratified train/test split 70/30
+        for d in np.linspace(1, 10, 10):
+            #evaluate each dataset over 5 different C values
+            clf = DecisionTreeClassifier(max_depth=d).fit(X_train, y_train)#for each C train
+            y_pred = (clf.predict_proba(X_test))[:,1]# get prob predictions
+            fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
+            aucs[i, j, k] =(roc_auc_score(y_test, y_pred))#3-order tensor,auc for each C
+            j = j + 1# for each dataset for each epoch
 means = np.mean(np.mean(aucs, axis =2), axis =0)#mean auc per c over all datasets and epochs
 print(means)
 fig, ax = plt.subplots(3,1)
