@@ -1,19 +1,21 @@
-#%%
-from turtle import width
-from arfftocsv import processing
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import  RandomForestClassifier, VotingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, roc_auc_score
+from sklearn.model_selection import train_test_split
+from arfftocsv import processing
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.optimize import minimize
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.factory import get_sampling, get_crossover, get_mutation, get_termination
-from evaluation import evaluation
+from evaluation import function_evaluation
 
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
-# this function deletes @ and empty lines so that produce a 
 
 to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
 'bmicat': ["'1.underweight less than 18.5'",
@@ -65,18 +67,12 @@ data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
 data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
 data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 ####Find best max number of trees ##################
-X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
-y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
-from sklearn.ensemble import  RandomForestClassifier, VotingClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix, roc_auc_score
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
+X = data[all_labels[:-1]]# get the features
+y= data[all_labels[len(all_labels)-1]] # get the target class
 
-#clf = VotingClassifier(estimators=estimators, voting='soft', weights=[0.4, 0.6])
-##auc evaluation####
 #using auc and sensitivity we must find the pareto front with nsga2
 def objective_function( X, y, weights: list) -> list:
+    """This is the vector of objective function to maximize"""
     LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
     RF = RandomForestClassifier(n_estimators=100, max_depth=4, min_samples_split=0.03,
      min_samples_leaf=0.05)
@@ -109,7 +105,7 @@ class MyProblem(ElementwiseProblem):
        xl = np.array([0,0]),
        xu= np.array([1,1]))
    
-   def _evaluate(self, x, out,*args, **kwargs):
+   def _evaluate(self, x, out):
       f1, f2 = objective_function(X, y, weights = x)
       g1 = x[0] + x[1] - 1
       g2 = -x[0] - x[1] + 0.99
@@ -117,11 +113,9 @@ class MyProblem(ElementwiseProblem):
       out["G"] = g1,g2
 
 problem = MyProblem()
-   
 res = minimize(problem, algorithm, termination, seed=1, save_history=True, verbose=True)
 Xs = res.X
 F= res.F
-#%%
 LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
 RF = RandomForestClassifier(n_estimators=100, max_depth=4, min_samples_split=0.03,
  min_samples_leaf=0.05)
@@ -135,5 +129,5 @@ plt.scatter(-F[:, 0], -F[:, 1], s=30, facecolors='none', edgecolors='blue')
 plt.title("Objective Space")
 plt.show()
 print(Xs)
-evaluation(clf, X, y)
+function_evaluation(clf, X, y)
 
