@@ -1,14 +1,15 @@
-#%%
-from turtle import width
-from arfftocsv import processing
 import numpy as np
 import pandas as pd
+from sklearn.impute import KNNImputer
+from sklearn.naive_bayes import GaussianNB
+from arfftocsv import processing
+from evaluation import function_evaluation
+
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
-# this function deletes @ and empty lines so that produce a 
 
 to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
 'bmicat': ["'1.underweight less than 18.5'",
@@ -42,18 +43,13 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
   'trig':[], 'sys1':[], 'dias3':[], 'fglu':[], 'hba1c':[]
  }
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels, values= values)
-
-from sklearn.impute import KNNImputer
 imp = KNNImputer(n_neighbors=1)
 x =imp.fit_transform(data)
 data = pd.DataFrame(x, columns=all_labels)
 #print(pd.isna(data).sum())
-X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
-y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
-from sklearn.naive_bayes import GaussianNB
-from evaluation import evaluation
+X = data[all_labels[:-1]]# get the features
+y= data[all_labels[len(all_labels)-1]]# get the target class
 #Evaluate model capability by measuring AUC
 clf = GaussianNB()
 # Final evaluation with threshold optimization
-evaluation(clf, X, y)
-# %%
+function_evaluation(clf, X, y)
