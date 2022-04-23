@@ -41,7 +41,7 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
     'drinkd_e':[],'itot':[],'cfoodo1m':[], 'estwt':[],'chol':[],'ldl':[], 'hdl':[],
   'trig':[], 'sys1':[], 'dias3':[], 'fglu':[], 'hba1c':[]
  }
-
+#prepare data
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels,
  values= values)
 #Filling missing values by mean/mode
@@ -62,9 +62,9 @@ data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 
 X = data[all_labels[:-1]]
 y= data[all_labels[len(all_labels)-1]]
-LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
+LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7) # first classifier
 RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.03,
- min_samples_leaf=0.05)
-estimators = [('lr', LR), ('rf', RF)]
-clf = VotingClassifier(estimators=estimators, voting='soft')
-function_evaluation(clf, X, y)
+ min_samples_leaf=0.05) # second classifier
+estimators = [('lr', LR), ('rf', RF)]# classifer pool
+clf = VotingClassifier(estimators=estimators, voting='soft') # ensebmle voting  classifer with soft voting
+function_evaluation(clf, X, y) # evaluate classifer

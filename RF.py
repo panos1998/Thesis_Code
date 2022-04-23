@@ -44,10 +44,10 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
     'drinkd_e':[],'itot':[],'cfoodo1m':[], 'estwt':[],'chol':[],'ldl':[], 'hdl':[],
   'trig':[], 'sys1':[], 'dias3':[], 'fglu':[], 'hba1c':[]
  }
-
+#prepare data
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels,
  values= values)
-
+#replace missing  values with mean/mode
 data['drinkd_e'] = data['drinkd_e'].fillna(data['drinkd_e'].mean())
 data['itot'] = data['itot'].fillna(data['itot'].mean())
 data['cfoodo1m'] = data['cfoodo1m'].fillna(data['cfoodo1m'].mean())
@@ -65,7 +65,6 @@ data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 ####Find best max number of trees ##################
 X = data[all_labels[:-1]]
 y= data[all_labels[len(all_labels)-1]]
-
 #Evaluate model capability by measuring AUC
 scores = list()
 aucs = np.zeros((10, 4, 10)) # initialize an array to store aucs
@@ -74,22 +73,22 @@ for k in tqdm.tqdm(range(10), colour='CYAN'):
   # for 100 epochs
   for i in range(0,10):
     # run through 10 different stratified datasets
-    j = 0 # TRUE NEGATIVE RATE = SPECIFICITY
+    j = 0
     X_train, X_test, y_train, y_test = train_test_split(X, y,
     train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
     for n in [100, 200, 500, 1000]:
-      #evaluate each dataset over 5 different C values
+      #evaluate each dataset over 4 different n_trees values
       clf = RandomForestClassifier(n_estimators=n,max_depth=4,
-      min_samples_split=0.03, min_samples_leaf=0.05).fit(X_train, y_train)# train classifier over a dataset for C values
+      min_samples_split=0.03, min_samples_leaf=0.05).fit(X_train, y_train)#train over a dataset for ntree values
       y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
       fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
-      aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
+      aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each n_trees
       j = j + 1                                      # for each dataset for each epoch
-means = np.mean(np.mean(aucs, axis =2), axis =0)#mean auc per c over all datasets and epochs
+means = np.mean(np.mean(aucs, axis =2), axis =0)#mean auc per n_trees over all datasets and epochs
 print(means)
 plt.xlabel('Number of trees')
 plt.ylabel('Mean AUC')
 plt.plot([100, 200, 500, 1000], means)
 clf = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03,
  min_samples_leaf=0.05 )
-function_evaluation(clf, X, y)
+function_evaluation(clf, X, y) # evaluate classifier

@@ -43,10 +43,11 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
     'drinkd_e':[],'itot':[],'cfoodo1m':[], 'estwt':[],'chol':[],'ldl':[], 'hdl':[],
   'trig':[], 'sys1':[], 'dias3':[], 'fglu':[], 'hba1c':[]
  }
+ #Prepare data
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels, values= values)
-imp = KNNImputer(n_neighbors=1)
-x =imp.fit_transform(data)
-data = pd.DataFrame(x, columns=all_labels)
+imp = KNNImputer(n_neighbors=1) # impute the data with nearest neighboor using n= 1 neighbors
+x =imp.fit_transform(data) # apply imputation
+data = pd.DataFrame(x, columns=all_labels) # the imputed data
 #print(pd.isna(data).sum())
 X = data[all_labels[:-1]]# get the features
 y= data[all_labels[len(all_labels)-1]]# get the target class

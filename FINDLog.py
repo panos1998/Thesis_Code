@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from arfftocsv import processing
 import tqdm
 from evaluation import function_evaluation
+
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
@@ -29,7 +30,7 @@ to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'M
 values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
  'bmicat': [1, 2, 3, 4, 5, 6],'hemda': [0, 1, 2], 'everHighGlu': [0, 1, 2],
  'eatVegFru': [0,1], 'physActive':[0, 1], 'rYdiabe': [0, 1]}
-
+# prepare  the data
 path = 'FINDLog.csv'
 data = processing(all_labels, labels, to_replace, values, path)
 # Apply machine learning techniques
@@ -39,7 +40,7 @@ aucs = np.zeros((10, 8, 100)) # initialize an array to store aucs
 for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
     for i in range(0,10):
         # run through 10 different stratified datasets
-        j = 0# TRUE NEGATIVE RATE = SPECIFICITY
+        j = 0
         X_train, X_test, y_train, y_test = train_test_split(X, y,
         train_size= 0.7,test_size=0.03, stratify=y)# stratified train/test split 70/30
         for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:
@@ -56,4 +57,4 @@ plt.xlabel('C value')
 plt.ylabel('Mean AUC')
 plt.plot(['0.0001', '0.001', '0.01', '0.1', '1', '10', '100', '1000'], means)
 clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
-function_evaluation(clf, X, y)
+function_evaluation(clf, X, y) # evaluate classifier

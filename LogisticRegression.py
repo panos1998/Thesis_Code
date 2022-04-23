@@ -42,6 +42,7 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
   'trig':[], 'sys1':[], 'dias3':[], 'fglu':[], 'hba1c':[]
  }
 
+#prepare data
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels,
  values= values)
 #Filling missing values by mean/mode
@@ -63,4 +64,4 @@ data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 X = data[all_labels[:-1]]# get the features
 y= data[all_labels[len(all_labels)-1]]# get the target class
 clf = LogisticRegression(C=100, solver='liblinear', tol=1e-7, max_iter=200)
-function_evaluation(clf, X, y)
+function_evaluation(clf, X, y) #evaluate classifier

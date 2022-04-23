@@ -42,7 +42,7 @@ values = {'LeicAge': [0, 1, 2], 'LeicGender': [0, 1],
     'drinkd_e':[],'itot':[],'cfoodo1m':[], 'estwt':[],'chol':[],'ldl':[], 'hdl':[],
   'trig':[], 'sys1':[], 'dias3':[], 'fglu':[], 'hba1c':[]
  }
-
+#prepare data
 data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels,
  values= values)
 #Filling missing values by mean/mode
@@ -60,13 +60,13 @@ data['hba1c'] = data['hba1c'].fillna(data['hba1c'].mean())
 data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
 data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
 data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
-####Find best max number of trees ##################
+
 X = data[all_labels[:-1]]
 y= data[all_labels[len(all_labels)-1]]
-LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
-RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.03,
+LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7) # first base estimator
+RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.03, # second base  estimator
 min_samples_leaf=0.05)
 metaRF = RF
-estimators = [('lr', LR), ('rf', RF)]
-clf = StackingClassifier(estimators=estimators,final_estimator=metaRF)
-function_evaluation(clf, X, y)
+estimators = [('lr', LR), ('rf', RF)] # estimators pool
+clf = StackingClassifier(estimators=estimators,final_estimator=metaRF) # ensemble stackig estimator
+function_evaluation(clf, X, y) # evaluate classifer
