@@ -1,16 +1,16 @@
-#%%
-from turtle import width
-from evaluation import evaluation
-from arfftocsv import processing
 import numpy as np
-import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score, roc_curve
+from sklearn.model_selection import train_test_split
+from evaluation import function_evaluation
+from arfftocsv import processing
 import tqdm
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
-# this function deletes @ and empty lines so that produce a 
 
 to_replace = {'LeicAge': ['50-59', '60-69', '>=70'], 'LeicGender': ['Female', 'Male'], 
 'bmicat': ["'1.underweight less than 18.5'",
@@ -61,37 +61,31 @@ data['hba1c'] = data['hba1c'].fillna(data['hba1c'].mean())
 data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
 data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
 data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
-#data2 = data.dropna(axis =1 )
 ####Find best max number of trees ##################
-X = data[all_labels[:-1]] #data2.iloc[:,:-3] # get the features
-y= data[all_labels[len(all_labels)-1]]#data2.iloc[:,-1]#data[all_labels[len(all_labels)-1]] # get the target class
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, roc_curve
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
+X = data[all_labels[:-1]] 
+y= data[all_labels[len(all_labels)-1]]
+
 #Evaluate model capability by measuring AUC
 scores = list()
 aucs = np.zeros((10, 4, 10)) # initialize an array to store aucs
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
 for k in tqdm.tqdm(range(10), colour='CYAN'): # for 100 epochs
-    for i in range(0,10): # run through 10 different stratified datasets
-       j = 0                                       # TRUE NEGATIVE RATE = SPECIFICITY
-       X_train, X_test, y_train, y_test = train_test_split(X, y,
-       train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
-       for n in [100, 200, 500, 1000]:#evaluate each dataset over 5 different C values
-           clf = RandomForestClassifier(n_estimators=n,max_depth=4,
-            min_samples_split=0.03, min_samples_leaf=0.05).fit(X_train, y_train) # train classifier over a dataset for C values
-           y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
-           fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
-           aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
-           j = j + 1                                      # for each dataset for each epoch
-means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datasets and epochs
+  for i in range(0,10): # run through 10 different stratified datasets
+    j = 0 # TRUE NEGATIVE RATE = SPECIFICITY
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+    train_size= 0.7,test_size=0.3, stratify=y) # stratified train/test split 70/30
+    for n in [100, 200, 500, 1000]:#evaluate each dataset over 5 different C values
+      clf = RandomForestClassifier(n_estimators=n,max_depth=4,
+      min_samples_split=0.03, min_samples_leaf=0.05).fit(X_train, y_train)# train classifier over a dataset for C values
+      y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
+      fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
+      aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
+      j = j + 1                                      # for each dataset for each epoch
+means = np.mean(np.mean(aucs, axis =2), axis =0)#mean auc per c over all datasets and epochs
 print(means)
 plt.xlabel('Number of trees')
 plt.ylabel('Mean AUC')
 plt.plot([100, 200, 500, 1000], means)
-#%%
 clf = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03,
  min_samples_leaf=0.05 )
-evaluation(clf, X, y)
-# %%
+function_evaluation(clf, X, y)
