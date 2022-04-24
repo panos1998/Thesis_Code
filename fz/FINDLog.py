@@ -1,11 +1,6 @@
 """ finnish logistic  evaluator"""
-import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import  roc_auc_score, roc_curve
-from sklearn.model_selection import train_test_split
 from arfftocsv import processing
-import tqdm
 from evaluation import function_evaluation
 from parameter_selection import function_parameter_selection
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
