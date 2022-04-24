@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from arfftocsv import processing
 import tqdm
 from evaluation import function_evaluation
-
+from parameter_selection import function_parameter_selection
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
@@ -36,25 +36,13 @@ data = processing(all_labels, labels, to_replace, values, path)
 # Apply machine learning techniques
 X = data[labels[:-1]] # get the features
 y = data[labels[len(labels)-1]] # get the target class
-aucs = np.zeros((10, 8, 100)) # initialize an array to store aucs
-for k in tqdm.tqdm(range(100), colour='CYAN'): # for 100 epochs
-    for i in range(0,10):
-        # run through 10 different stratified datasets
-        j = 0
-        X_train, X_test, y_train, y_test = train_test_split(X, y,
-        train_size= 0.7,test_size=0.03, stratify=y)# stratified train/test split 70/30
-        for c in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]:
-            #evaluate each dataset over 8 different C values
-            clf = LogisticRegression(C=c, solver='liblinear',penalty='l2').fit(X_train, y_train) # train classifier over a dataset for C values
-            y_pred = (clf.predict_proba(X_test))[:,1] # get prob predictions
-            fpr, sensitivity, thresholds = roc_curve(y_test, y_pred) # get metrics
-            aucs[i, j, k] =(roc_auc_score(y_test, y_pred)) #3-order tensor saves auc for each C
-            j = j + 1                                      # for each dataset for each epoch
-means = np.mean(np.mean(aucs, axis =2), axis =0) # mean auc per c over all datasets and epochs
-print(means)
-plt1 = plt.figure(1)
-plt.xlabel('C value')
-plt.ylabel('Mean AUC')
-plt.plot(['0.0001', '0.001', '0.01', '0.1', '1', '10', '100', '1000'], means)
-clf = LogisticRegression(C=100, solver='liblinear', penalty='l2').fit(X_train, y_train)
+# evaluate model over C parameter
+clf = LogisticRegression()
+params = {'solver':'liblinear', 'penalty':'l2'}
+optimize ='C'
+grid = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
+title ='AUC per C parameter '
+function_parameter_selection(clsf=clf, X=X, y=y,params=params,optimize=optimize,grid=grid,title=title,epochs=100)
+# final evaluation
+clf = LogisticRegression(C=100, solver='liblinear', penalty='l2')
 function_evaluation(clf, X, y) # evaluate classifier
