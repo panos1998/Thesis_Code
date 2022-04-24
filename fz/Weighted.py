@@ -112,7 +112,8 @@ class MyProblem(ElementwiseProblem):
         out["F"] = [f1,f2] # export objectives
         out["G"] = g1,g2 # export constraints
 problem = MyProblem() # initialize problem
-res = minimize(problem, algorithm, termination, seed=1, save_history=True, verbose=True)  # start solving
+res = minimize(problem, algorithm, termination, seed=1,
+save_history=True, verbose=True)  # start solving
 Xs = res.X #  the non dominated solutions in decision space
 F= res.F # the non dominated points in objective space
 LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7)
@@ -121,10 +122,12 @@ RF = RandomForestClassifier(n_estimators=100, max_depth=4, min_samples_split=0.0
 estimators = [('lr', LR), ('rf', RF)]
 weights = Xs[3] # choose  the fourth non dominated point
 clf= VotingClassifier(estimators=estimators, voting='soft', weights=weights)
-plt.scatter(Xs[:,0], Xs[:,1], s=30, facecolors='none', edgecolors='r') # plot solutions
+plt.scatter(Xs[:,0], Xs[:,1], s=30, facecolors='none',
+edgecolors='r') # plot solutions
 plt.title('Design Space')
 plt.show()
-plt.scatter(-F[:, 0], -F[:, 1], s=30, facecolors='none', edgecolors='blue') # plot Pareto optimal front
+plt.scatter(-F[:, 0], -F[:, 1], s=30, facecolors='none',
+edgecolors='blue') # plot Pareto optimal front
 plt.title("Objective Space")
 plt.show()
 function_evaluation(clf, X, y) #evaluate weighted classifier
