@@ -64,7 +64,8 @@ data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
 X = data[all_labels[:-1]]
 y= data[all_labels[len(all_labels)-1]]
 LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7) # first base estimator
-RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.03, # second base  estimator
+RF = RandomForestClassifier(n_estimators=200, max_depth=4,
+ min_samples_split=0.03, # second base  estimator
 min_samples_leaf=0.05)
 metaRF = RF
 estimators = [('lr', LR), ('rf', RF)] # estimators pool

@@ -66,5 +66,5 @@ LR = LogisticRegression(solver='liblinear', max_iter=200, tol=1e-7) # first clas
 RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.03,
  min_samples_leaf=0.05) # second classifier
 estimators = [('lr', LR), ('rf', RF)]# classifer pool
-clf = VotingClassifier(estimators=estimators, voting='soft') # ensebmle voting  classifer with soft voting
+clf = VotingClassifier(estimators=estimators, voting='soft')#ensebmle voting  classifer with soft voting
 function_evaluation(clf, X, y) # evaluate classifer

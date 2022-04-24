@@ -69,7 +69,8 @@ params = {'max_depth':4, 'min_samples_split': 0.03, 'min_samples_leaf': 0.05}
 optimize = 'n_estimators'
 grid = [100, 200, 500, 1000]
 title = 'RF AUC with respect to number of trees'
-function_parameter_selection(clsf=clf, X=X, y=y,params=params,optimize=optimize,grid=grid,title=title)
+function_parameter_selection(clsf=clf, X=X, y=y,params=params,optimize=optimize,
+grid=grid,title=title)
 clf = RandomForestClassifier(n_estimators=400, max_depth=4, min_samples_split=0.03,
  min_samples_leaf=0.05 )
 function_evaluation(clf, X, y) # evaluate classifier

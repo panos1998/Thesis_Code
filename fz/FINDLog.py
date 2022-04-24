@@ -37,7 +37,8 @@ params = {'solver':'liblinear', 'penalty':'l2'}
 optimize ='C'
 grid = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 title ='AUC per C parameter '
-function_parameter_selection(clsf=clf, X=X, y=y,params=params,optimize=optimize,grid=grid,title=title,epochs=100)
+function_parameter_selection(clsf=clf, X=X, y=y,params=params,optimize=optimize,
+grid=grid,title=title,epochs=100)
 # final evaluation
 clf = LogisticRegression(C=100, solver='liblinear', penalty='l2')
 function_evaluation(clf, X, y) # evaluate classifier
