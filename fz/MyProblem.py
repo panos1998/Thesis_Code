@@ -1,8 +1,8 @@
 import numpy as np
 from objective_function import objective_function
 from pymoo.core.problem import ElementwiseProblem
-from weighted_data import weighted_data
-X, y = weighted_data()
+from function_fill_data import function_fill_data
+X, y = function_fill_data()
 class MyProblem(ElementwiseProblem):
     def __init__(self):
         super().__init__ (n_var=2,
