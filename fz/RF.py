@@ -4,7 +4,9 @@ from evaluation import function_evaluation
 from parameter_selection import function_parameter_selection
 from function_fill_data import function_fill_data
 ####Find best max number of trees ##################
-X, y = function_fill_data()
+X, y = function_fill_data(categorical=['smoken', 'raeducl', 'jphysa'],
+ continuous=['drinkd_e', 'itot', 'cfoodo1m', 'chol',
+'hdl', 'ldl', 'trig', 'sys1', 'dias3', 'fglu', 'hba1c'])
 #Evaluate model capability by measuring AUC
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
 clf = RandomForestClassifier()

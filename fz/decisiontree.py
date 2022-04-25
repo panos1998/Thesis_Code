@@ -12,7 +12,9 @@ all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
 ####Find best max depth##################
-X, y = function_fill_data()
+X, y = function_fill_data(categorical=['smoken', 'raeducl', 'jphysa'],
+ continuous=['drinkd_e', 'itot', 'cfoodo1m', 'chol',
+'hdl', 'ldl', 'trig', 'sys1', 'dias3', 'fglu', 'hba1c'])
 clf = DecisionTreeClassifier()
 params ={}
 optimize = 'max_depth'

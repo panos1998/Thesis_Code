@@ -40,5 +40,7 @@ plt.scatter(-F[:, 0], -F[:, 1], s=30, facecolors='none',
 edgecolors='blue') # plot Pareto optimal front
 plt.title("Objective Space")
 plt.show()
-X, y = function_fill_data()
+X, y = function_fill_data(categorical=['smoken', 'raeducl', 'jphysa'],
+ continuous=['drinkd_e', 'itot', 'cfoodo1m', 'chol',
+'hdl', 'ldl', 'trig', 'sys1', 'dias3', 'fglu', 'hba1c'])
 function_evaluation(clf, X, y) #evaluate weighted classifier

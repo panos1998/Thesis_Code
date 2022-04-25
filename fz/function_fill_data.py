@@ -1,6 +1,7 @@
+from typing import List
 import numpy as np
 from arfftocsv import processing
-def function_fill_data():   
+def function_fill_data(categorical: List[str], continuous: List[str]):   
     all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
@@ -41,20 +42,10 @@ def function_fill_data():
     data = processing(labels=all_labels, to_replace=to_replace,all_labels=all_labels,
  values= values)
 #Filling missing values by mean/mode
-    data['drinkd_e'] = data['drinkd_e'].fillna(data['drinkd_e'].mean())
-    data['itot'] = data['itot'].fillna(data['itot'].mean())
-    data['cfoodo1m'] = data['cfoodo1m'].fillna(data['cfoodo1m'].mean())
-    data['chol'] = data['chol'].fillna(data['chol'].mean())
-    data['hdl'] = data['hdl'].fillna(data['hdl'].mean())
-    data['ldl'] = data['ldl'].fillna(data['ldl'].mean())
-    data['trig'] = data['trig'].fillna(data['trig'].mean())
-    data['sys1'] = data['sys1'].fillna(data['sys1'].mean())
-    data['dias3'] = data['dias3'].fillna(data['dias3'].mean())
-    data['fglu'] = data['fglu'].fillna(data['fglu'].mean())
-    data['hba1c'] = data['hba1c'].fillna(data['hba1c'].mean())
-    data['smoken']=data['smoken'].fillna(data['smoken'].mode()[0])
-    data['raeducl']=data['raeducl'].fillna(data['raeducl'].mode()[0])
-    data['jphysa']=data['jphysa'].fillna(data['jphysa'].mode()[0])
+    for label in categorical:
+        data[label] = data[label].fillna(data[label].mode()[0])
+    for label in continuous:
+        data[label] = data[label].fillna(data[label].mean())
 ####Find best max number of trees ##################
     X = data[all_labels[:-1]]# get the features
     y= data[all_labels[len(all_labels)-1]] # get the target class
