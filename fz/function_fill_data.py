@@ -1,6 +1,6 @@
 import numpy as np
 from arfftocsv import processing
-def weighted_data():   
+def function_fill_data():   
     all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',

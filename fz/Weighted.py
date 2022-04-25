@@ -7,7 +7,7 @@ from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.factory import get_sampling, get_crossover, get_mutation, get_termination
 from evaluation import function_evaluation
 from MyProblem import MyProblem
-from weighted_data import weighted_data
+from function_fill_data import function_fill_data
 #the nsga2 algorithm initialization to solve our optimization problem
 ################################
 algorithm = NSGA2(
@@ -40,5 +40,5 @@ plt.scatter(-F[:, 0], -F[:, 1], s=30, facecolors='none',
 edgecolors='blue') # plot Pareto optimal front
 plt.title("Objective Space")
 plt.show()
-X, y = weighted_data()
+X, y = function_fill_data()
 function_evaluation(clf, X, y) #evaluate weighted classifier

@@ -5,14 +5,14 @@ from sklearn.tree  import DecisionTreeClassifier
 from sklearn import tree
 from evaluation import function_evaluation
 from parameter_selection import function_parameter_selection
-from weighted_data import weighted_data
+from function_fill_data import function_fill_data
 all_labels = ['LeicGender','LeicRace','raeducl','mstat','shlt','hlthlm',
 'mobilb','lgmusa','grossa','finea','LeicHBP','LeicAge','hearte',
 'psyche','bmicat','physActive','drinkd_e','smoken','itot','cfoodo1m',
 'jphysa','estwt','wstva','chol','hdl','ldl','trig','sys1','dias3',
 'fglu','hba1c','hemda','eatVegFru','everHighGlu','rYdiabe']
 ####Find best max depth##################
-X, y = weighted_data()
+X, y = function_fill_data()
 clf = DecisionTreeClassifier()
 params ={}
 optimize = 'max_depth'

@@ -2,9 +2,9 @@
 from sklearn.ensemble import RandomForestClassifier
 from evaluation import function_evaluation
 from parameter_selection import function_parameter_selection
-from weighted_data import weighted_data
+from function_fill_data import function_fill_data
 ####Find best max number of trees ##################
-X, y = weighted_data()
+X, y = function_fill_data()
 #Evaluate model capability by measuring AUC
 #for j in range (500):         # TRUE POSITIVE RATE = SENSITIVITY
 clf = RandomForestClassifier()
