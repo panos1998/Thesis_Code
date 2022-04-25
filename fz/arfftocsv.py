@@ -15,7 +15,7 @@ def function_arfftocsv(source: str, dest: str = 'processed.csv'):
 def function_labelize(dest: str, labels: list, source: str = 'processed.csv') -> pd.DataFrame:
     """This function takes a destination dir, a source dir, the labels to add
     and returns a dataframe with all labels for each column"""
-    df = pd.read_csv(source, names=labels,index_col=False, na_values='?')
+    df = pd.read_csv(source, names=labels,index_col=False, na_values='?', sep=',')
     df.to_csv(dest, header=True, index_label=False, index=False)
     return df
 
