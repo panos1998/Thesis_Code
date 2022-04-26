@@ -35,17 +35,17 @@ test_size = 0.25, random_state =6)
 X_knn= imputer.fit_transform(X_norm)
 X_k_train, X_k_test, y_k_train, y_k_test = train_test_split(X_knn, y,
 test_size = 0.25, random_state =6)
-imputer = IterativeImputer(estimator=RandomForestRegressor(),max_iter=10, random_state=6)
+imputer = IterativeImputer(estimator=RandomForestRegressor(),max_iter=10, random_state=3)
 X_rf = imputer.fit_transform(X_norm)
 X_rf_train, X_rf_test, y_rf_train, y_rf_test = train_test_split(X_rf, y,
 test_size = 0.25, random_state =6)
-imputer = IterativeImputer(estimator=LinearRegression(), max_iter=10, random_state=6)
+imputer = IterativeImputer(estimator=LinearRegression(), max_iter=10, random_state=3)
 X_lr = imputer.fit_transform(X_norm)
 X_lr_train, X_lr_test, y_lr_train, y_lr_test = train_test_split(X_lr, y,
 test_size = 0.25, random_state =6)
 # classifiers
-linear = SVC(kernel='linear', probability=True)
-rbf = SVC(probability=True)
+linear = SVC(kernel='linear', C=100)
+rbf = SVC(C =100)
 nb = GaussianNB()
 ann = MLPClassifier(max_iter=1000)
 clfs = [linear, rbf, nb, ann]
