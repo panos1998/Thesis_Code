@@ -47,10 +47,10 @@ test_size = 0.25, random_state =6)
 linear = SVC(kernel='linear', probability=True)
 rbf = SVC(probability=True)
 nb = GaussianNB()
-ann = MLPClassifier(max_iter=1000, hidden_layer_sizes=(100,100))
+ann = MLPClassifier(max_iter=1000)
 clfs = [linear, rbf, nb, ann]
 features = [X_mean, X_knn, X_rf, X_lr]
-names = ['linear  SVM', 'rbf SVM', 'Naive Bayes', 'ANN']
+names = ['Linear  SVM', 'RBF SVM', 'Naive Bayes', 'ANN']
 for clf, name in zip(clfs, names):
   function_clf_by_data(clf,features=features,y=y, name=name)
 # %%
