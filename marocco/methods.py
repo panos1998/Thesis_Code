@@ -4,7 +4,6 @@ import pandas as pd
 from concat_df import function_concat_df
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
 from sklearn.impute import KNNImputer
 from sklearn.naive_bayes import GaussianNB
 from sklearn.experimental import enable_iterative_imputer
@@ -30,24 +29,17 @@ y = df[colnames[-1]]  # select class
 X_norm = scaler.fit_transform(X) # apply minmax to features
 X_norm = pd.DataFrame(X_norm, columns=colnames[:-1])
 X_mean=X_norm.fillna(X_norm.mean(), inplace=False)
-X_train, X_test, y_train, y_test = train_test_split(X_mean, y,
-test_size = 0.25, random_state =6)
 X_knn= imputer.fit_transform(X_norm)
-X_k_train, X_k_test, y_k_train, y_k_test = train_test_split(X_knn, y,
-test_size = 0.25, random_state =6)
-imputer = IterativeImputer(estimator=RandomForestRegressor(),max_iter=10, random_state=3)
+imputer = IterativeImputer(estimator=RandomForestRegressor(),max_iter=10, random_state=29)
 X_rf = imputer.fit_transform(X_norm)
-X_rf_train, X_rf_test, y_rf_train, y_rf_test = train_test_split(X_rf, y,
-test_size = 0.25, random_state =6)
-imputer = IterativeImputer(estimator=LinearRegression(), max_iter=10, random_state=3)
+imputer = IterativeImputer(estimator=LinearRegression(),max_iter=10, random_state=29)
 X_lr = imputer.fit_transform(X_norm)
-X_lr_train, X_lr_test, y_lr_train, y_lr_test = train_test_split(X_lr, y,
-test_size = 0.25, random_state =6)
+
 # classifiers
-linear = SVC(kernel='linear', C=100)
-rbf = SVC(C =100)
+linear = SVC(kernel='linear')
+rbf = SVC()
 nb = GaussianNB()
-ann = MLPClassifier(max_iter=1000)
+ann = MLPClassifier()
 clfs = [linear, rbf, nb, ann]
 features = [X_mean, X_knn, X_rf, X_lr]
 names = ['Linear  SVM', 'RBF SVM', 'Naive Bayes', 'ANN']
