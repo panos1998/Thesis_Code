@@ -23,7 +23,7 @@ X_norm = scaler.fit_transform(X) # apply minmax to features
 nb = GaussianNB()
 svm = SVC()
 scores = np.array(np.zeros((38,2)))
-for i in range(1,39):
+for i in range(1,39): # for different values impute with KNN
     imputer = KNNImputer(n_neighbors=i)
     X = imputer.fit_transform(X_norm)
     X_train, X_test, y_train, y_test = train_test_split(X, y,

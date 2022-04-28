@@ -37,9 +37,10 @@ gdb = GradientBoostingClassifier(learning_rate=1, n_estimators=3)
 xtr = ExtraTreesClassifier(n_estimators=80)
 lgbm = lgb.LGBMClassifier(learning_rate=0.009,n_estimators=1000, objective='binary')
 sgdc = SGDClassifier(learning_rate='adaptive',loss='log', eta0=1)
-nsvc = NuSVC(nu = 0.25)
+nsvc = NuSVC(nu = 0.25, probability= True)
 stck = StackingClassifier(estimators=[('xgb',xgb),('adb',adb), ('xtr',xtr),
-('lgbm',lgbm), ('sgdc',sgdc),('nsvc', nsvc), ('gdb',gdb)], final_estimator=nsvc)
+('lgbm',lgbm), ('sgdc',sgdc),('nsvc', nsvc), ('gdb',gdb)],stack_method='predict_proba',
+passthrough=True,final_estimator=nsvc)
 classifiers = [xgb,adb,gdb,xtr,lgbm,sgdc,nsvc,stck]
 function_evaluation(classifiers, X_lr,y, names)
 # %%

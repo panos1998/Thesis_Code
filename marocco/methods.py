@@ -28,12 +28,11 @@ y = df[colnames[-1]]  # select class
 X_norm = scaler.fit_transform(X) # apply minmax to features
 X_norm = pd.DataFrame(X_norm, columns=colnames[:-1])
 X_mean=X_norm.fillna(X_norm.mean(), inplace=False)
-X_knn= imputer.fit_transform(X_norm)
+X_knn= imputer.fit_transform(X_norm) # X with NN
 imputer = IterativeImputer(estimator=ExtraTreeRegressor(),max_iter=100, random_state=29,
 imputation_order='random')
 X_rf = imputer.fit_transform(X_norm)
-imputer = IterativeImputer(
-imputation_order='random',max_iter=100, random_state=29)
+imputer = IterativeImputer(imputation_order='random',max_iter=100, random_state=29)
 X_lr = imputer.fit_transform(X_norm)
 
 # classifiers
@@ -44,6 +43,6 @@ ann = MLPClassifier()
 clfs = [linear, rbf, nb, ann]
 features = [X_mean, X_knn, X_rf, X_lr]
 names = ['Linear  SVM', 'RBF SVM', 'Naive Bayes', 'ANN']
-for clf, name in zip(clfs, names):
+for clf, name in zip(clfs, names): # for all classifiers evaluate rocs
   function_clf_by_data(clf,features=features,y=y, name=name)
 # %%

@@ -5,11 +5,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, roc_curve
 def function_evaluation(classifiers: List[Any], X: List[List], y: List,
 names: List[str]):
+    """
+    This function takes as arguments a list of classifiers  to evaluate, X features list, y target list
+    and names as labels for  the plot
+"""
     for classifier, name in zip(classifiers, names):
         X_train, X_test, y_train, y_test = train_test_split(X, y,
     test_size=0.25, random_state=3)
         classifier.fit(X_train, y_train)
         y_pred = classifier.predict(X_test)
+        fpr,tpr,_=roc_curve(y_test, y_pred)
         tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
         spec = tn/(tn+fp)
         prec = tp/(tp+fp)
