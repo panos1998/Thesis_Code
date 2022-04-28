@@ -1,6 +1,7 @@
 #%%
 from typing import List
 import pandas as pd
+from sklearn.tree import ExtraTreeRegressor
 from concat_df import function_concat_df
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
@@ -8,8 +9,6 @@ from sklearn.impute import KNNImputer
 from sklearn.naive_bayes import GaussianNB
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPClassifier
 from clf_by_data import function_clf_by_data
 #%%
@@ -30,9 +29,11 @@ X_norm = scaler.fit_transform(X) # apply minmax to features
 X_norm = pd.DataFrame(X_norm, columns=colnames[:-1])
 X_mean=X_norm.fillna(X_norm.mean(), inplace=False)
 X_knn= imputer.fit_transform(X_norm)
-imputer = IterativeImputer(estimator=RandomForestRegressor(),max_iter=10, random_state=29)
+imputer = IterativeImputer(estimator=ExtraTreeRegressor(),max_iter=100, random_state=29,
+imputation_order='random')
 X_rf = imputer.fit_transform(X_norm)
-imputer = IterativeImputer(estimator=LinearRegression(),max_iter=10, random_state=29)
+imputer = IterativeImputer(
+imputation_order='random',max_iter=100, random_state=29)
 X_lr = imputer.fit_transform(X_norm)
 
 # classifiers

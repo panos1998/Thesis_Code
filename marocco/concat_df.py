@@ -16,5 +16,6 @@ function that takes the dir of a number of csvs, adds column names
   for d, s in zip(dest, source):
     df = function_labelize(dest=d, labels=labels, source = s)
     dataframe = pd.concat([dataframe, df], axis=0, ignore_index=True)
+  dataframe.to_csv('data.txt', index=False)
   return dataframe
 # %%

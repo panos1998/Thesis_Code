@@ -15,6 +15,7 @@ source = ['processed.cleveland.data', 'processed.hungarian.csv',
 dest = ['label1.csv', 'label2.csv', 'label3.csv', 'label4.csv']
 df = function_concat_df(dest=dest, labels=colnames, source=source)
 df['cvd'] = df['cvd'].replace([2,3,4], 1) # replace cvd 2,3,4 with 1
+print(df.isna().sum())
 scaler = MinMaxScaler() # initialize a min max scaler
 X = df[colnames[:-1]] # select features
 y = df[colnames[-1]]  # select class
