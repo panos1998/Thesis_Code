@@ -2,7 +2,7 @@ from typing import List, Any
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, roc_curve
+from sklearn.metrics import confusion_matrix, roc_curve, roc_auc_score
 def function_evaluation(classifiers: List[Any], X: List[List], y: List,
 names: List[str]):
     """
@@ -23,7 +23,7 @@ names: List[str]):
         f1 = 2*prec*rec/(prec+rec)
         fpr,tpr,_=roc_curve(y_test, y_pred)
         plt.plot(fpr, tpr, label =name)
-        print(acc, spec, prec, rec, f1)
+        print(acc, spec, prec, rec, f1, roc_auc_score(y_test, y_pred))
     plt.plot(np.arange(0.0,1.1,0.1),np.arange(0.0,1.1,0.1), linestyle="--", label='random')
     plt.vlines(0,0,1, colors='orange')
     plt.hlines(1,0,1, colors='orange', label='ideal')
