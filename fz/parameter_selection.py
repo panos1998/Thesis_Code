@@ -1,3 +1,4 @@
+#%%
 from typing import List, Dict
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,7 +6,7 @@ import tqdm
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 def function_parameter_selection(clsf, X: List[List], y: List, params: Dict,
- optimize: str, grid: List,title: str, epochs: int=10 ):
+ optimize: str, grid: List, title: str, epochs: int=10 )-> List:
     aucs = np.zeros((10, len(grid), epochs)) # initialize an array to store aucs
     for k in tqdm.tqdm(range(epochs), colour='CYAN'):
         for i in range(0,10):
@@ -27,3 +28,4 @@ def function_parameter_selection(clsf, X: List[List], y: List, params: Dict,
     plt.ylabel('Mean AUC')
     plt.plot(grid, means)
     plt.show()
+# %%

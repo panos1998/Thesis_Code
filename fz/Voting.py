@@ -1,3 +1,4 @@
+#%%
 """voting evaluator"""
 from sklearn.ensemble import  RandomForestClassifier, VotingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -13,3 +14,5 @@ RF = RandomForestClassifier(n_estimators=200, max_depth=4, min_samples_split=0.0
 estimators = [('lr', LR), ('rf', RF)]# classifer pool
 clf = VotingClassifier(estimators=estimators, voting='soft')#ensebmle voting  classifer with soft voting
 function_evaluation(clf, X, y) # evaluate classifer
+
+# %%

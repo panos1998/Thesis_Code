@@ -2,7 +2,9 @@ import numpy as np
 from objective_function import objective_function
 from pymoo.core.problem import ElementwiseProblem
 from function_fill_data import function_fill_data
-X, y = function_fill_data()
+X, y = function_fill_data(categorical=['smoken', 'raeducl', 'jphysa'],
+ continuous=['drinkd_e', 'itot', 'cfoodo1m', 'chol',
+'hdl', 'ldl', 'trig', 'sys1', 'dias3', 'fglu', 'hba1c'])
 class MyProblem(ElementwiseProblem):
     def __init__(self):
         super().__init__ (n_var=2,

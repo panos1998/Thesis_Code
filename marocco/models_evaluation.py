@@ -18,6 +18,10 @@ source = ['processed.cleveland.data', 'processed.hungarian.csv',
 'processed.va.csv', 'processed.switzerland.csv']
 dest = ['label1.csv', 'label2.csv', 'label3.csv', 'label4.csv']
 df = function_concat_df(dest=dest, labels=colnames, source=source)
+file = open('results.txt', 'w')
+print(df.isna().sum(),file=file)
+file.close()
+#%%
 df['cvd'] = df['cvd'].replace([2,3,4], 1) # replace cvd 2,3,4 with 1
 df.to_csv('data.txt',index=False)
 scaler = MinMaxScaler() # initialize a min max scaler
@@ -40,7 +44,7 @@ sgdc = SGDClassifier(learning_rate='adaptive',loss='log', eta0=1)
 nsvc = NuSVC(nu = 0.25, probability= True)
 stck = StackingClassifier(estimators=[('xgb',xgb),('adb',adb), ('xtr',xtr),
 ('lgbm',lgbm), ('sgdc',sgdc),('nsvc', nsvc), ('gdb',gdb)],stack_method='predict_proba',
-passthrough=True,final_estimator=nsvc)
+passthrough=True,final_estimator=nsvc, cv=7)#7
 classifiers = [xgb,adb,gdb,xtr,lgbm,sgdc,nsvc,stck]
 function_evaluation(classifiers, X_lr,y, names)
 # %%

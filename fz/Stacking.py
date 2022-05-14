@@ -1,3 +1,4 @@
+#%%
 """stacking algorithm evaluation"""
 from sklearn.ensemble import StackingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -13,5 +14,7 @@ RF = RandomForestClassifier(n_estimators=200, max_depth=4,
 min_samples_leaf=0.05)
 metaRF = RF
 estimators = [('lr', LR), ('rf', RF)] # estimators pool
-clf = StackingClassifier(estimators=estimators,final_estimator=metaRF)# ensemble stackig estimator
+clf = StackingClassifier(estimators=estimators,
+final_estimator=metaRF, cv=5)# ensemble stackig estimator
 function_evaluation(clf, X, y) # evaluate classifer
+# %%

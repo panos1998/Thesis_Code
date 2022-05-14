@@ -27,7 +27,7 @@ for i in range(1,39): # for different values impute with KNN
     imputer = KNNImputer(n_neighbors=i)
     X = imputer.fit_transform(X_norm)
     X_train, X_test, y_train, y_test = train_test_split(X, y,
-test_size = 0.25, random_state =None)
+test_size = 0.25, random_state =None)#339
     nb.fit(X_train, y_train)
     acc= nb.score(X_test, y_test)
     scores[i-1,0] = acc

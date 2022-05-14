@@ -1,3 +1,4 @@
+#%%
 """decision tree evaluator"""
 import subprocess
 import numpy as np
@@ -16,6 +17,7 @@ X, y = function_fill_data(categorical=['smoken', 'raeducl', 'jphysa'],
  continuous=['drinkd_e', 'itot', 'cfoodo1m', 'chol',
 'hdl', 'ldl', 'trig', 'sys1', 'dias3', 'fglu', 'hba1c'])
 clf = DecisionTreeClassifier()
+#%%
 params ={}
 optimize = 'max_depth'
 grid = np.linspace(1, 10, 10)
@@ -39,9 +41,12 @@ title = 'AUC per min samples leaf parameter'
 function_parameter_selection(clsf=clf, X=X, y=y,params=params,optimize=optimize,
 grid=grid,title=title,epochs=100)
 #final evaluation
+#%%
 clf = DecisionTreeClassifier(max_depth=4, min_samples_split=0.03, min_samples_leaf=0.05)
 classifier = function_evaluation(clf, X, y) # evaluate classifier
 # export tree graph
 dot_data = tree.export_graphviz(classifier, out_file='tree2.dot',feature_names=all_labels[:-1],
 class_names=['No', 'Yes'], filled=True, rounded=True,  special_characters=True)
 subprocess.run(['dot','-Tpng','tree2.dot','-o','tree4.png'], check=True) # save tree as png
+
+# %%

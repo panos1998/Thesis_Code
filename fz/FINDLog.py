@@ -1,3 +1,4 @@
+#%%
 """ finnish logistic  evaluator"""
 from sklearn.linear_model import LogisticRegression
 from arfftocsv import processing
@@ -42,3 +43,5 @@ grid=grid,title=title,epochs=100)
 # final evaluation
 clf = LogisticRegression(C=100, solver='liblinear', penalty='l2')
 function_evaluation(clf, X, y) # evaluate classifier
+
+# %%
