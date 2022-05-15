@@ -1,3 +1,4 @@
+#%%
 """Naive Bayes evaluator"""
 import numpy as np
 import pandas as pd
@@ -55,3 +56,5 @@ y= data[all_labels[len(all_labels)-1]]# get the target class
 clf = GaussianNB()
 # Final evaluation with threshold optimization
 function_evaluation(clf, X, y)
+
+# %%

@@ -1,5 +1,7 @@
 #%%
 """weighted ensemble evaluator"""
+import numpy as np
+import seaborn as sb
 import matplotlib.pyplot as plt
 from sklearn.ensemble import  RandomForestClassifier, VotingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -9,6 +11,7 @@ from pymoo.factory import get_sampling, get_crossover, get_mutation, get_termina
 from evaluation import function_evaluation
 from MyProblem import MyProblem
 from function_fill_data import function_fill_data
+import numpy as np
 #the nsga2 algorithm initialization to solve our optimization problem
 ################################
 algorithm = NSGA2(
@@ -46,12 +49,30 @@ plt.xlabel("AUC")
 plt.ylabel('Sensitivity')
 plt.show()
 #%%
+
 weights = Xs[4] # choose  the fourth non dominated point
 clf= VotingClassifier(estimators=estimators, voting='soft', weights=weights)
 
 X, y = function_fill_data(categorical=['smoken', 'raeducl', 'jphysa'],
  continuous=['drinkd_e', 'itot', 'cfoodo1m', 'chol',
 'hdl', 'ldl', 'trig', 'sys1', 'dias3', 'fglu', 'hba1c'])
-function_evaluation(clf, X, y) #evaluate weighted classifier
-
+clf =function_evaluation(clf, X, y) #evaluate weighted classifier
+probs = clf.predict_proba(X)
+target = [0.3 +np.random.random_sample()/10 if _==0 else 0.7+ np.random.random_sample()/10 for _ in y]
+plt.scatter(target,probs[:,1], s=6, facecolors='none',
+edgecolors='black')
+plt.xlim([0,1])
+plt.xticks([0.35,0.75],['Healthy', 'Diseased'])
+plt.ylabel('Cut-off point')
+plt.yticks([0,0.2,0.4,0.6,0.8])
+plt.hlines(y=0.193,xmin=0,xmax=1,linestyles='dashed')
+plt.show()
+data = [(prob,label) for prob,label in zip(probs[:,1],y)]
+class0=[tuple for tuple in data if tuple[1]==0]
+class1=[tuple for tuple in data if tuple[1]==1]
+sb.kdeplot([np.round(point[0],2).astype(float) for point in class0],fill=True,bw=0.35)
+sb.kdeplot([np.round(point[0],2).astype(float) for point in class1],fill=True,bw=0.35)
+plt.vlines(x=0.193,ymin=0,ymax=5.5,linestyles='dashed')
+plt.xlabel('Cut-off point')
+plt.show()
 # %%
